@@ -1,0 +1,26 @@
+/* include/mozg/config.h.in.  Generated automatically from configure.in by autoheader.  */
+
+/* Define to empty if the keyword does not work.  */
+#undef const
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Package name. */
+#define MOZG_PACKAGE "mozg"
+
+/* Package version. */
+#define MOZG_VERSION 0.0.1
+
+/* Sequental package version (hex). */
+#define MOZG_SEQ_VERSION 0x000001
+
+/* Define if you have the <limits.h> header file.  */
+#undef HAVE_LIMITS_H
+
+/* Name of package */
+#undef PACKAGE
+
+/* Version number of package */
+#undef VERSION
+

@@ -1,0 +1,305 @@
+*******************************************************************************
+
+    Neural Network Library mozg
+    Copyright (C) 1999 Alexy Filin
+
+*******************************************************************************
+
+Contents README
+================
+
+  1. mozg Introduction.
+
+    1.1 Neuron's output function.
+
+    1.2 Learning rules.
+
+    1.3 Acknowledgements.
+
+  2. Bibliography.
+
+*******************************************************************************
+
+Contents DOC_1 file
+====================
+
+  1. "Soft" rules.
+
+  2. mozg Programmer's guide.
+
+    2.1 mozgMLP class (interface functions).
+
+      2.1.1 Interface functions.
+
+      2.1.2 General draft of a network learning.
+
+      2.1.3 Code example of a network learning.
+
+      2.1.4 Code example of a saved net using.
+
+    2.2 How to insert another output function.
+
+      2.2.1 For net = sum(w_{ij}*y_j).
+
+      2.2.2 For RBF_net = -.5*sum(m_{ij}-y_j)^2/sigma_i^2.
+
+    2.4 How to change basic types.
+
+*******************************************************************************
+
+Contents DOC_2 file
+====================
+
+  1. Package map.
+
+  2. Kernel library.
+
+    2.1 Description.
+
+    2.2 Optimisation technique.
+
+      2.2.1 Address arithmetic.
+
+      2.2.2 Sliding for vector-matrix product.
+
+      2.2.3 The bottleneck of compilators.
+
+      2.2.4 Some advices else.
+
+  3. Memory manager.
+
+  4. mozgMLP class (protected functions).
+
+    4.1 Descrition.
+
+    4.2 Devision by zero.
+
+*******************************************************************************
+
+                        1. mozg Introduction
+                       ======================
+
+    mozg is a flexible, fast neurolibrary. Up to the moment it allows one
+    to create, learn and use multi-layer perceptron (MLP) [1,9], which is the
+    most popular artificial neural network (ANN) for the large number of
+    problems solved by a ANN.
+
+      Structural parts of the mozg are:
+
+        1. Kernel library is the library of fast vector and matrix operations. 
+    It consists of mozgVector and mozgMatrix class temlates [2] and functions 
+    templates using them. Explanations of its appearance see in DOC_2 2.1.
+    
+        2. mozgMLP class (using the Kernel library) simulates the MLP and
+    its behaviour. One can by the constructor creates an ANN with desirable
+    the number of layers, the number of neurons (called units) in them, output
+    function in each layer (except input layer storing network's inputs), 
+    with/without bias term, learn, use, save and load a network.
+
+      Dynamic memory allocations have been placed in the memory_manager()
+    and don't influence on the MLP learning and using CPU times, because
+    constructors of vectors and matrices is called only in the function, which
+    is called for a network's initiation and an initiation of learning rules.
+    So there's no unnecessary vector & matrix constructor calls.
+
+
+1.1 Neuron's output function.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      Output of i-th neuron of a layer is computed as [1,3]:
+
+        output_i = f(net_i) = f(sum_j(w_{ij}*input_j+theta_i)),
+
+    where f(net_i) -- neuron's output function,
+          net_i -- weighted inputs sum of i-th neuron
+          w_{ij} -- weight for j-th input of i-th neuron,
+          input_j -- j-th input of i-th neuron,
+          theta_i -- bias term or simply bias of  i-th neuron, for binary
+    neuron it's named "threshhold".
+
+      Sometimes they use neuron's activation function:
+
+        a_{i,t} = g(a_{i,t-1},net_i),
+
+        output_{i,t} = f(a_{i,t}),
+
+    to use dependensy of neuron's output from time. It hasn't been implemented
+    in the library.
+
+      The temperature (T) in the output function allows to change slope para-
+    meter (gain in here) of the output function [3]:
+
+        output_i = f(net_i/T) = f(net_i*gain).
+
+    Decreasing of the temperature sharpens error surface (named energy 
+    landscape) and conversly its increasing softens the surface, so one can
+    manage learning by it. One of global optimisation methods so called
+    annealing is simulated by temperature decreasing, at first temperature is 
+    taken large then it is decreased to zero. To remove division by zero
+    gain is calculated for its initiation as:
+
+               ( 1/T   if T!=0
+        gain = |
+               ( 1/EPS if T==0 where EPS << 1 is defined in math.hh
+
+      For any layer (except input one storing network's inputs) neurons' output
+    function may be choosed from (standard set):
+
+        1. 1/(1+exp[-net/T]),
+        2. th(net/T),
+        3. net/T,
+        4. Radial Basis Function --
+           RBF = exp(-.5*sum(m_{ij}-y_j)^2/(sigma_i^2*T)),
+        5. 2/Pi arctg(net/T),
+
+    or desirable one may be inserted (see 3.2.3). RBF is a "local" function
+    and differs from the others by the "net", which isn't weighted input sum as
+    for those. Due to it the learning rule must be changed considerably for the
+    RBF layer and previous one. I've deduced and implemented in the simulator
+    error backpropagation rule for the three cases:
+
+      a) RBF for hidden and output layer,
+
+      b) RBF for hidden, sigmoid (or th, atg) for output layer,
+
+      c) sigmoid (or th, atg) for hidden, RBF for output layer,
+
+    that allow to use RBF in any combinations with sigmoid (or th, atg) on
+    other layers. Example of deducing error backpropagation rule for RBF
+    for output and sigmoid for hidden layer see in [5]. Local RBF nature may 
+    lead to a "sharp sweep". It's the bad phenomenon being caused by the bad
+    "scattering" of learning examples in the input space and clear shows itself
+    on the function approximation problem. This trouble one can overcome if
+    one put the RBF_sigma_min > 0 (large value results in the
+    network learningless) or good scattering of learning examples.
+
+
+1.2 Learning rules.
+^^^^^^^^^^^^^^^^^^^
+      Implemented learning rules are backprop and heuristic methods using
+    information about curvature of the energy surface:
+
+        I. "vanilla" backpropagation extended by the momentum term [1,2,7], 
+    Langevin noise [4], weight decay [4,7]:
+
+        w_{ij,t+1} = w_{ij,t} + delta w_{ij,t} =
+                    = w_{ij,t} -
+                      - eta * dE/dw_{ij} +
+                      + alpha * delta w_{ij,t-1} +
+                      + Langevin_noise_term -
+                      - decay_coef * w_{ij,t}.
+
+    Chunk updating is the way for which changings of weights are saved up for a
+    chunk of the learning examlpes and adjustment of weights is done at the end
+    of the chunk.
+
+        II. Quickprop:
+
+    "...w_{ij,t+1} = w_{ij,t} + delta w_{ij,t},
+
+        delta w_{ij,t+1} =
+           = - eta * Heav(d_{w}E_{t+1} * d_{w}E_{t}) +
+	     + [d_{w}E_{t+1}/(d_{w}E_{t} - d_{w}E_{t+1})] * delta w_{ij,t+1},
+
+    where Heav() is the Heaviside step function and d_{w}E_{t} is the
+    derivative of E with respect to the actual weight. This updating 
+    corresponds to a "switched" gradient descent with a parabolic estimate
+    for the momentum term..." [4]. Partial derivatives are calculated for one
+    learning example or chunk before each weights adjustment. Quickprop has
+    gotten a bad property: "...To prevent the weights from growing too large,
+    which indicates that Quickprop is going wrong, a maximum scale is set on
+    the weight update and it is recomended to use a weight decay term."[4].
+    So I made the limit of the weight update, its default value is in
+    "mozg/math.cc" and you may change it.
+
+        III. Rprop:
+
+        w_{ij,t+1} = w_{ij,t} + delta w_{ij,t},
+
+        delta w_{ij,t+1} = - eta_{w,t+1} * sgn(d_{w}E_{t}),
+
+                      ( gamma_{+}*eta_{w,t}, if d_{w}E_{t}*d_{w}E_{t+1} > 0
+        eta_{w,t+1} = |
+                      ( gamma_{-}*eta_{w,t}, if d_{w}E_{t}*d_{w}E_{t+1} < 0
+
+    where 0 < gamma_{-} < 1 < gamma_{+}. " ...is the use of individual learning
+    rates for each weight that are adjusted accoding to how "well" the actual
+    weights is doing. Ideally, these individual learning rates adjust to the
+    curvature of the error surface and reflect the inverse of the Hessian..."
+    [4]. In the case gamma_{-} = gamma_{+} the rule is named Manhatten one.
+    Partial derivatives are calculated for all learning set each time of
+    an weights adjustment.
+
+      Any of three energy functions may be used in the learning of a network:
+
+        1) summed squared error E = sum_p sum_i (t_i^p-o_i)^2,
+
+        2) Cross-Entropy E = - sum_p sum_i [(t_i^p-o_{min})*ln(o_i-g_{min})+
+                                            (o_{max}-t_i^p)*ln(g_{max}-o_i)],
+
+        3) log-squared error E = - sum_p sum_i ln(1-(o_i-t_i^p)^2),
+
+    Surely, they may be used in turn for the learning of a network.
+
+      The possibility to learn network with using of random order of learning
+    examples has been implemented in the library, it improves network
+    generalization (property of network to recognize examples not used in
+    learning correctly) [4]. Don't use it for Rprop learning which is in need
+    of the same learning set for each epoch.
+
+      A lot of info about ANN for beginers one will find at the [9]:
+    ftp://ftp.sas.com/pub/neural/FAQ.html
+
+      Sometimes I had trouble with learning 1,2,...-hidden layers network with
+    linear output function for all layers(it is meaningless, but for the sake
+    of interest). Learning lost stability and simulator crashed, because linear
+    output function has constant non-zero derivative for all domain of
+    function and weights may grow infinitely.
+
+
+1.3 Acknowledgements.
+^^^^^^^^^^^^^^^^^^^^^
+      I want to thank my chiefs Dr. Vladimir Obraztsov (corresponding member of
+    Russian Academy of Sciences) and Dr. Anatoly Sokolov for their support.
+    I've gotten lots of usefull advices from Wasilx Urazmetow about technical
+    details of programming, without them mozg wouldn't be as it is.
+
+
+      Please, send me lost bugs and suggestions related to the mozg to the
+    e-mail filin@desert.ihep.su. Good luck!
+                                                Alexy P. Filin 14/10/99
+
+*******************************************************************************
+
+                    2. Bibliography
+                   =================
+
+    [1]	J.Freeman, D.Scapura; {\it Neural Network: algorithms, applications, 
+programming techniques.} Addison-Wesley Publishing Company, 1991, --422 p.
+
+    [2] B. Stroustrup {\it The C++ programmig language,} third edition,
+Addison-Wesley Publishing Company, 1997, --9XX p.
+
+    [3]	C.Peterson, Th.R\"{o}gnvaldsson; {\it An Introduction to Artificial 
+Neural networks,} Department of Theoretical Phisics, University of Lund Sweden.
+
+    [4]	C.Peterson, Th.R\"{o}gnvaldsson; {\it JETNET 3.0 --- A Versatile
+Neural Network Package,} Department of Theoretical Phisics, University of Lund
+Sweden.
+
+    [5]	J.Proriol; {\it Multi-modular neural network for the classification of 
+$e^+ e^-$ hadronic events;} NIMA 337 (1994).
+
+    [6]	C.Svarer; {\it Neural Network for Signal Processing,} Ph.D. Thesis,
+ph.d. nr. 91-0112-134, CONNECT, Electronic Institute, Technical University of
+Denmark, 1995.
+
+    [7]	A.Zell et. al.; {\it Stuttgart Neural Network Simulator: User manuale, 
+Version 4.2;} University of Stutgart, Institute for parallel and distributed
+high performance systems (IPVR); University of T\"{u}bingen, 
+Wilhelm-Schickard-Institute for Computer Science.
+
+    [8] http://world.std.com/~nr
+
+    [9] ftp://ftp.sas.com/pub/neural/FAQ.html
+
+*******************************************************************************

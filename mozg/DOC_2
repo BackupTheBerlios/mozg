@@ -1,0 +1,531 @@
+*******************************************************************************
+
+    Neural Network Library mozg
+    Copyright (C) 1999 Alexy Filin
+
+*******************************************************************************
+
+Contents
+=========
+
+  1. Package map.
+
+  2. Kernel library.
+
+    2.1 Description.
+
+    2.2 Optimisation technique.
+
+      2.2.1 Address arithmetic.
+
+      2.2.2 Sliding for vector-matrix product.
+
+      2.2.3 The bottleneck of compilators.
+
+      2.2.4 Some advices else.
+
+  3. Memory manager.
+
+  4. mozgMLP class (protected functions).
+
+    4.1 Descrition.
+
+    4.2 Devision by zero.
+
+*******************************************************************************
+
+                    1. Package map
+                   ================
+
+    1.  types.hh -- basic types definitions.
+
+    2.  math.cc[hh] -- neuron output functions, its derivatives and definitions
+    of some mathematic constants.
+
+    3.  random.cc[hh] -- random number generators (flat and Gauss)
+
+    4.  errorMessage.cc[hh] -- keeps function for error message output, is used
+    mozgMLP interface functions.
+
+
+Kernel library:
+
+    5.  vector.cc[hh] -- vector and its inheritor checked vector class
+    templates and using them function templates.
+
+    6.  matrix.cc[hh] -- matrix and its inheritor checked vector class
+    templates and using them function templates.
+
+    7.  vector_matrix.cc[hh] -- function templates using bouth vectors and
+    matrices.
+
+    8.  vector_matrix_io.cc[hh] -- vector & matrix i/o functions.
+
+
+mozgMLP class:
+
+    9.  struct_layer.hh -- definition of the network layer struct.
+
+    10. mozgMLP.hh -- class definition.
+
+    11. mozgMLP_1.cc -- interface functions.
+
+    12. mozgMLP_2.cc -- protected functions.
+
+    13. mozgMLP_3.cc -- manager of mozgMLP dynamic memory.
+
+    14. mozgMLP_io.cc -- mozgMLP i/o functions.
+
+    15. limits.hh -- limits for the weights, sigmas (RBF), etc.
+
+
+    16. README, DOC_1, DOC_2 -- description, manual, documentation.
+
+    17. GNU style files (the rest).
+
+
+*******************************************************************************
+
+                     2. Kernel library.
+                    ====================
+
+2.1 Description.
+^^^^^^^^^^^^^^^^
+
+    Extracting of vector and matrix operations from the neurosimulator is a
+    consequence of ANN model, that has been described in terms of vector and
+    matrix operations. Calculations with vectors and matrices occupy nearly
+    all time of a neurosimulator's run leave only some percents or even some
+    shares of percent for rest, so to extract them in separate library is very
+    convenient for further acceleration of the neurosimulator, because you only
+    need to change some library's functions by faster ones (for example, by
+    written in assembler or even hardware implemented ones) to get the
+    acceleration. If you want to do it I'm ready to answer your questions
+    about the library.
+      Kernel library consists of the vector and matrix class templates, their
+    inheritors checked_vector and checked_matrix class templates (which extend
+    base classes by upper and lower limits for elements and functions to
+    control them) and optimised member_functions and non-member-functions
+    templates.
+     Those classes and functions may be used independent from mozgMLP as a
+    library for vector and matrix operations. But it isn't universal vector
+    and matrix library, because it has been created for requirements of the 
+    neurosimulator (Some of those will be used in following mozg versions). 
+    Explicit instantiation of those templates functions for float, int value
+    types and int size type has been made in files of kernel library (see
+    1. Package map).
+      Some functions require that the number of matrix elements are less than
+    max value of mozgint type.
+ 
+2.2 Optimisation technique.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.2.1 Address arithmetic.
+
+    You know well that using of address arithmetic in the heavy for a CPU
+    places allows to speed up program significantly (if a compilator self can't
+    optimize source). Beacuse I used the method:
+
+    | matrix is allocated in one string, so we can slide through matrix by
+    | "get-and-displace" operation *p++ where p -- pointer to matrix element.
+
+    For instance, in the function of out vector product computation instead of:
+
+           matr_t** matr_prod = matrix->matr ();
+           vec_t* temp1 = v1.vec (),
+                * temp2;
+
+           vec_size_t size1 = v1.size (),
+                      size2 = v2.size (),
+                      i;
+
+           for (i=0; i<size1; i++)
+             {
+               temp2 = v2.vec ();
+
+               for (j=0; j<size2; j++)
+                 matr_prod[i][j] = temp1[i] * temp2[j];
+             }
+
+    I've written:
+
+           matr_t** matr_prod = matrix->matr () [0];
+           vec_t* temp1 = v1.vec (),
+                * temp2;
+
+           vec_size_t size1 = v1.size (),
+                      size2 = v2.size (),
+                      i;
+
+           while (size1--)
+             {
+               temp2 = v2.vec ();
+               i = size2;
+
+               while (i--)
+       	         *temp3++ = *temp1 * *temp2++;
+
+               temp1++;
+             }
+
+    because I didn't want rely upon cleverness of compilator designers.
+
+2.2.2 Sliding for vector-matrix product.
+
+    The method was used for vector-matrix product:
+
+           instead of:
+
+                for(..i..) { 
+                  for(..j..) {
+                    result_vector[i] += vector[j] * matrix[j][i];
+                  }
+                }
+
+           I've written:
+
+                
+                for(..i..) {
+                  m = &matrix[0][i];
+                  for(..j..) {
+                    *result_vector += *vector++ * *m;
+                    m += matrix_columns_num;
+                  }
+                }
+
+    m[j][i] is compiled to
+
+       *( *(m + j*sizeof(matrix[0]))*sizeof(matrix[0][0]) + i),
+
+    that requires more CPU time than
+
+        m += matrix_columns_num {* sizeof(matrix[0][0])},
+
+    so we get considerable gain for intensive vector-matrix operations (in a
+    neurosimulator, for example). If we should use transponed matrix it should
+    led to the extra memory consumption undesirable for big matrices.
+
+2.2.3 The bottleneck compilators.
+
+    Described above way one must use very carefully. Such an aggressive
+    optimisation may lead to compilator will make up code which will give that
+    one won't wait. For instance I've tested six slightly different variants
+    of function making OR of two vectors, I used compilators egcs-2.91.60 and
+    DEC_C++_Version_5.7 (they bouth have given the same results for each
+    variant) on the operating system Digital UNIX V4.0B. Here are the results:
+
+    (temp1 points to first vector,
+     temp2 to second one,
+     v1 -- original first vector,
+     v2 -- second vector,
+     v3 -- first vector after calculations)
+
+      1) *temp1++ = (*temp1 || *temp2);
+         temp2++;
+
+      2) *temp1 = (*temp1++ || *temp2);
+         temp2++;
+
+      3) *temp1++ = (*temp1 || *temp2++);
+
+      4) *temp1 = (*temp1++ || *temp2++);
+
+      5) *temp1 = (*temp1 || *temp2++);
+         temp1++;
+
+      6) *temp1 = (*temp1 || *temp2);
+         temp1++;
+         temp2++;
+
+         v1: 1 1 1 0 0 2 2 2 0 2 0 0 0 0 0 0 2 0 0 0
+         v2: 0 3 0 0 0 3 0 3 0 3 0 0 0 0 0 3 0 0 0 0
+
+      1) v3: 1 1 0 0 1 1 1 1 1 1 0 0 0 0 0 1 0 0 0 0
+      2) v3: 1 1 1 0 0 1 1 1 0 1 0 0 0 0 0 1 1 0 0 0 <-
+      3) v3: 1 1 0 1 1 1 1 0 1 0 0 1 0 1 0 1 1 0 0 0
+   4),5) v3: 1 1 1 0 1 1 1 1 0 1 0 0 1 0 1 0 1 1 0 0
+      6) v3: 1 1 1 0 0 1 1 1 0 1 0 0 0 0 0 1 1 0 0 0 <-
+
+    As you see only second and sixth variants have given right result. In my
+    opinion fifth one should give the right result too (because temp2 was used
+    once in calculations), but it didn't. Isn't it strange? Second one is 
+    enough suspicious but it is successive. So I repeat one more time one
+    mustn't rely on rationality of a compilator in those cases.
+
+2.2.4 Some advices else.
+
+    Certainly you know to give over object by pointer or reference helps us to
+    remove needless copying of one. To make sure constancy of the object they
+    use the modificator "const". If you use array of functions then to give
+    over a function by the pointer helps accelerate program too. Also you know
+    there're machine-dependent methods of acceleration but serious reasons for
+    them using must be, because if you want that your program can be used on
+    different architectures you have to adapt the program to them.
+
+      I've found that access time for auto-values is less one for
+    member-values, so in the parts consuming much CPU time I copy class
+    member-value to auto-value and use in calculations the last.
+
+      There's the gimmick to use struct consisting of a floating point values
+    (the number) and an integer values (representing order of number) to 
+    represent a floating point numbers and compare the integer values for
+    comparing operations, then if it's need (orders are equal) compare number
+    self. If a lot of numbers differs by orders you get a good acceleration.
+
+*******************************************************************************
+
+                        3. Memory manager
+                       ===================
+
+    I've called so a simple function that really performs management of dynamic
+    memory at the library. By request it allocates library's objects in dynamic
+    memory and makes garbage collection. It appears due to increasing
+    complexity of the dynamic objects tracking for the library development.
+
+      For giving over the info to memory_manager() (later m_m) to allocate 
+    requested object link vectors are used. Functions calling m_m must remember
+    the table of being allocated objects:
+
+      // Table of relations of link vectors  components to dynamic objects of
+      // network:
+      // ( s -- struct_layer,
+      //   v -- vector,
+      //  cv -- checked_vector,
+      //   m -- matrix,
+      //  cm -- checked_matrix )
+      //
+      // 0  s  layer[i]
+      // 1  v  layer[i].outputs
+      // 2  v  layer[i].nets
+      // 3  v  layer[i].errors
+      // 4  cv layer[i].sigmas
+      // 5  v  layer[i].sigmas_in_chunk
+      // 6  cm layer[i].weights
+      // 7  m  layer[i].RBFweights
+      // 8  cm layer[i].weight_etas
+      // 9  cm layer[i].last_deltas
+      // 10 m  layer[i].deltas_in_chunk
+      // 11 m  layer[i].pderivs
+      // 12 m  layer[i].prev_pderivs
+      // 13 m  layer[i].pderivs_in_chunk
+      // 14 v  layer[i].sigma_pderivs
+      // 15 v  layer[i].sigma_prev_pderivs
+      // 16 v  layer[i].sigma_pderivs_in_chunk
+      // 17 cv layer[i].last_sigma_deltas
+      // 18 cv layer[i].sigma_etas
+      // 19    layer[i].   reserve
+      // 20    layer[i].   reserve
+      // 21 v  diff
+      // 22 v  temp_vector
+      // 23 v  temp_vector2
+      // 24                reserve
+      // 25                reserve
+      // 26                reserve
+      // 27                reserve
+      // 28                reserve
+      // 29                reserve
+
+
+      The process of memory management is done as:
+
+        1) A function calling m_m puts flags of necessary for its needs objects
+          in the necessary_memory (nc_m) and call m_m;
+
+        2) m_m:
+
+            makes OR of nc_m and net_memory (n_m, which keeps flags of
+          objects representing network self and need always) and puts result
+          to nc_m, so now nc_m contains flags of all necessary for doings
+          objects,
+
+            then subtructs from the nc_m real_memory (r_m, which keeps flags of
+          objects existing yet) and puts result to nc_m. Now nc_m keeps:
+
+              1 for objects to allocate,
+
+              0 for objects which are need for doings and exist yet or aren't
+               exist and aren't need,
+
+             -1 for objects which exist and aren't need, so they may be
+               deleted,
+
+            then allocates(and zeroes) and deletes objects by nc_m
+
+            then makes OR of nc_m and r_m, puts result to r_m, which keeps
+          flags of allocated objects now,
+
+            lastly, zeroes nc_m to prepare it to the next own call;
+
+        3) Function called m_m makes some actions with allocated objects (for
+          example, randomizes them);
+
+      First and last calls of m_m for a network differ from the decribed above
+    algorithm.
+
+      For the first call m_m allocates array of struct_layer and the link
+    vectors and returns running back to the constructor (made first call) to
+    allow it put
+
+        1) the numbers of neurons at the layers,
+        2) flag of RBF output function for each layer which has RBF,
+        3) flags of always need objects (representing a network) to the
+          net_memory vector
+
+    for objects allocations for next call of m_m from the constructor. Input
+    layer is exception, it isn't usual layer, it only keeps network's inputs,
+    because their allocation and deleting are made separately from usual
+    layers.
+
+      For the last call from the destructor m_m get from it flag of last call
+    and doesn't make OR of nc_m with n_m, it only makes subtruction of r_m from
+    nc_m, so before allocations-deletings nc_m keep -1 for all existing
+    objects and 0 for the rest. Existing objects are deleted and last, link
+    vectors are do too. All allocated by m_m dynamic memory has been returned
+    by it.
+
+*******************************************************************************
+
+               4. mozgMLP class (protected functions)
+              ========================================
+
+4.1 Description
+^^^^^^^^^^^^^^^
+        1. void memory_manager (end_call)
+          mozgint end_call -- switch having values:
+
+            0 -- usual call,
+            1 -- destroying network call,
+
+    allocates memory by request (necessary_memory) and makes garbage collection
+
+        2. void put_inputs(inputs)
+          float* inputs -- pointer to the massive of network inputs,
+
+    puts the inputs in the network's input layer,
+
+        3. void compute_lay_outputs(LOWER
+                                    UPPER)
+          const struct_layer& LOWER -- outputs of the layer (layer[i-1]) are
+    used as inputs of
+          struct_layer* UPPER -- is a layer (layer[i]) signals are propagated
+    through,
+
+    computes outputs of a layer (propagates layer's inputs through the UPPER
+    layer),
+
+        4. void get_outputs(net_outputs)
+          mozgflt* net_outputs -- pointer to massive output vector has to be
+    placed in,
+
+    puts output layer outputs to the net_outputs (which allocated by
+    programmer),
+
+        5. void compute_output_errors (target,
+                                       outerrflag)
+          mozgflt* target -- desirable network's outputs,
+          bool outerrflag -- flag of calculation of output layer's error
+
+    computes difference between desirable and real outputs, places square of
+    the error vector module (t_i-y_i)^2 in the error_over_outputs and compute
+    output layer's errors if outerrflag is risen,
+
+        6. void compute_lay_errors (prev_layer,
+                                    prevlay_weights,
+                                    cur_layer)
+          const struct_layer& prev_layer -- the layer errors are propageted
+    from (layer[i+1]),
+          const mozgMatrix<mozgflt,mozgint>& prevlay_weights -- weights of
+    previous layer, they are different for the non-RBF and RBF nets,
+          struct_layer* cur_layer -- the layer errors are propagated to
+    (layer[i]),
+
+    computes errors of a hidden layer,
+
+        7. void backprop_errors()
+
+    propagates output errors back from output to first hidden layer of a
+    network,
+
+        8. adjust_lay_weights(prev_layer,
+			      cur_layer)
+          const struct_layer& prev_layer -- is the layer (layer[i-1]) which
+    outputs is used as inputs to
+          struct_layer* cur_layer -- is a layer (layer[i]) which weights are
+    adjusted of,
+
+    adjusts weights of a layer (used in backprop with extensions)
+
+        9. adjust_chunk_lay_weights (prev_layer,
+				     cur_layer);
+
+    adjusts weights of a layer for chunk learning (used in backprop with
+    extensions)
+
+        10. o_adjust_lay_weights(prev_layer,
+			         cur_layer)
+
+    adjusts weights of a layer (used in "vanilla" backprop)
+
+        11. o_adjust_chunk_lay_weights (prev_layer,
+				        cur_layer);
+
+    adjusts weights of a layer for chunk learning (used in backprop without
+    extensions)
+
+        12. void compute_lay_pderivs(prev_layer,
+			             next_layer,
+			             prevlay_weights,
+			             cur_layer);
+          const struct_layer& prev_layer -- the layer which weights is used
+    in *cur_layer errors calculations (layer[i+1]),
+          const struct_layer& next_layer -- the layer (layer[i-1]) which
+    outputs is used as inputs to *cur_layer (layer[i]),
+          const mozgMatrix<mozgflt,mozgint>& prevlay_weights -- weights of
+    previous layer (layer[i+1]), they are different for non-RBF and RBF
+    functions,
+          struct_layer* cur_layer -- the layer (layer[i]) which partial
+    derivative with respect to weights are calculated,
+
+    computes partial derivative of an error function for the current layer,
+
+        13. void compute_partial_derivatives(target)
+           mozgflt* target -- pointer to massive of network desirable
+    outputs,
+
+    computes partial derivative of an error function,
+
+        14. void adjust_weights_by_backprop ()
+
+    adjusts network's weights by Backprop rule (bouth chunk and non-chunk
+    updating),
+
+        15. void adjust_weights_by_quickprop (step_number)
+           int step_number -- number of steps for one example or chunk of
+    examples,
+
+    adjusts network's weights by Quickprop rule (bouth chunk and non-chunk
+    updating),
+
+        16. void adjust_weights_by_rprop (step_number)
+           int step_number -- number of steps for one example or chunk of
+    examples,
+
+    adjusts network's weights by Rprop rule (bouth chunk and non-chunk
+    updating),
+
+4.2 Devision by zero.
+^^^^^^^^^^^^^^^^^^^^^
+    To ensure a devision by zero wouldn't happen the library uses constants
+    EPS << 1 and OVER_UNIT = 1 + EPS, which have been defined at math.cc. The
+    first is used as:
+
+       	    while (!(*temp_vector != (mozgflt)0.))
+              *temp_vector += EPS;
+	    *diff /= *temp_vector;
+
+    where temp_vector is a pointer to an object-divisor, loop above will be
+    done while even if one element of object-divisor is equal zero. So
+    generally speaking EPS may influence on computation results but it will be
+    very small and one may change that influence replacing of EPS by less one.
+    OVER_UNIT is used likely EPS and all the speculations are right for it too.
+
+*******************************************************************************

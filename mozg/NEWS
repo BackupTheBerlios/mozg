@@ -1,0 +1,135 @@
+15/10/99 Alexy Filin
+	made mix of "chunk" with "on-line", so added num_for_chunk in
+	signatures of putBackprop() and putQuickprop();
+
+10/10/99 Alexy Filin
+	made Quickprop and Rprop for RBF;
+
+08/10/99 Alexy Filin
+	added extensions in Quickprop and Rprop, chunk training for Backprop
+	and Quickprop;
+
+07/10/99 Alexy Filin
+	placed all parts of the project in the namespace mozg to remove
+	possibility of names conflicts with another programs for them joint
+	using,
+
+03/10/99 Alexy Filin
+	added Qprop, Rprop;
+
+29/09/99 Alexy Filin
+	added cross-entropy error for th and atg output function;
+	
+	added cross-entropy error for nonstandard output function on output
+	layer, for it wrote void putNStdFuncParams (mozgflt,mozgflt) in
+	MLPerceptron.hh;
+
+///////////////////////////////////////////////////////////////////////////////
+////// mozg-0.4.3 /////////////////////////////////////////////////////////////
+
+28/09/99 Alexy Filin
+	added log-squared error, temperature for each layer.
+
+27/09/99 Alexy Filin
+	added new function -- answerMessage(), it is called by learnNet(). It
+ 	is intended for error observation and checking "on fly".
+
+	remove test error message from testNet(). Now the function returns
+	test error.
+
+24/09/99 Alexy Filin
+	added Cross-Entropy energy function, added in signature of
+	putLParams() energy function switch.
+
+19/09/99 Alexy Filin
+	made network learning for random order of used learning examples; it
+        helps to improve network generalization.
+
+18/09/99 Alexy Filin
+	added temperature of neuron's output function, to manage network
+	learning by sharpening/softening of the error surface.
+
+16/09/99 Alexy Filin
+	added bias term in the neuron's net; the term may be very usefull in
+        some problems;
+
+	changed layers' learning rate; now they are computed by rule of fan-in
+	in putLParams(), the rule is:
+               layer's_learning_rate = learning_rate / layer's_inputs_number.
+
+13/09/99 Alexy Filin
+	renamed propInput() by propInputs().
+
+
+///////////////////////////////////////////////////////////////////////////////
+////// mozg-0.3.5 /////////////////////////////////////////////////////////////
+
+20/07/99 Alexy Filin
+	wrote types.hh, replaced float by mozgflt and int by mozgint for easy
+	floating (float,double,long double) and integer (int,long,...) types
+	choosings;
+
+	wrote MLPOutFunc.[hh,cc] for easy inserting of nonstandard neuron
+        output function.
+
+
+19/07/99 Alexy Filin
+	simplified net constructor, now its signature:
+	MLPerceptron (int number_of_layers,
+                      int* num_outs_layers,
+                      int* func_number,
+                      float begin_weights_sigma);
+	
+	moved learning parameters initialisations in new functions:
+	putLParams (float learning_rate,
+                    float RBF_sigma_minimum) for "vanilla" backpropagation rule
+	putLParams (float RBF_sigma_minimum,
+		    float mom_term_coef,
+		    float lang_noise_begin_dispersion,
+		    float lang_noise_disp_decr_coef,
+		    float weight_decay_coef) for backprop with extensions;
+	
+	hid epoch and learning vector loops in learnNet (), its signature:
+	learnNet (float** linp,
+                  float** lout,
+                  int lssize,
+                  int epnum,
+                  int pepnum) learn network without testing,
+	learnNet (float** linp,
+                  float** lout,
+                  int lssize,
+                  int epnum,
+                  int pepnum,
+                  float** tinp,
+                  float** tout,
+                  int tssize); learn network with testing;
+
+	added
+	testNet (float** tinp,
+                 float** tout,
+                 int tssize)  for network test,
+	propInput (float* invec,
+                   float* outvec) propagate input vector through network,
+	propInput (float** invecarr,
+                   float** outvecarr,
+                   int ssize) propagate inp. vec. massive through network.
+
+14/07/99 Alexy Filin
+	renamed interface functions:
+	PutInputs      -> putInputs
+	GetOutputs     -> getOutputs
+	PropLayer      -> propLayer
+	PropForward    -> propForward
+	CompOutErrors  -> compOutErrors
+	BackPropErrors -> backpropErrors
+	AdjustWeights  -> adjustWeights
+	LearnNet       -> learnNet
+
+13/07/99 Released version 0.1.2, considerably extended README.
+
+28/06/99 Released version 0.1.1,
+	removed const bool first_iteration from signature of
+	AdjustWeights(const bool),
+	the same for LearnNet(float*, const bool)
+
+10/06/99 Released first version (0.0.1).

@@ -1,0 +1,211 @@
+18/10/99 Alexy Filin
+	add limits.[hh,cc] for defaul values of limits of checked vectors and
+	matrices;
+
+	add limit for the weight adding in Quickprop learning rule.
+
+	removed some bugs for Quickprop.
+
+16/10/99 Alexy Filin
+	removed some bugs from adjust_weights_by_...().
+
+15/10/99 Alexy Filin
+	divided adjust_weights in three	parts for each learning rule;
+
+	made mix of "chunk" with "on-line", so added num_for_chunk in
+	signatures of putBackprop() and putQuickprop().
+
+10/10/99 Alexy Filin
+	made Quickprop and Rprop for RBF.
+
+08/10/99 Alexy Filin
+	added extensions in Quickprop and Rprop, chunk training for Backprop
+	and Quickprop;
+
+	made dynamic memory manager and placed all mozgMLP memory allocations
+	to it; it's need for good dynamic memory checking, facilitating of
+	allocations and garbage collection.
+
+07/10/99 Alexy Filin
+	placed all parts of the project in the namespace mozg to remove
+	possibility of names conflicts with another programs for them joint
+	using;
+
+	renamed lots of names;
+
+03/10/99 Alexy Filin
+	added Qprop, Rprop;
+	
+	for them and for cross-entropy added EPS and UNIT to remove floating
+	point exceptions {devision by zero} being sometimes;
+	
+	renamed and remade a lots of member-function.
+
+30/09/99 Alexy Filin
+	simplified signature of compute_...() => ~6% acceleration
+
+29/09/99 Alexy Filin
+	added cross-entropy error for th and atg output function;
+	
+	added cross-entropy error for nonstandard output function on output
+	layer, for it wrote mozgVector&operator*=(mozgflt),
+	mozgVector&operator=+(mozgflt), mozgVector&operator=+(mozgVector&) in
+	kernel library and void putNStdFuncParams (mozgflt,mozgflt) in
+	MLPerceptron.hh, for last function made call checking in learnNet() to
+	make sure right run, added temp_vector2 and its existence flag to don't
+	allocate it twice and delete it in destructor, in putNStdFuncParams()
+	consider three cases of it range to optimise learning, because added
+	nonstand_func_type in MLPerceptron class.
+
+
+///////////////////////////////////////////////////////////////////////////////
+////// mozg-0.4.3 /////////////////////////////////////////////////////////////
+
+28/09/99 Alexy Filin
+	added log-squared error, for function approximation is observed a
+	little improving of convergency;
+
+	made learning rate and temperature for each layer, coefficients of
+	their changing. Now they can change rate and temperature in learning
+	time;
+
+	added default values of learning parameters.
+
+27/09/99 Alexy Filin
+	added new function -- answerMessage(), it is called by learnNet(). It
+ 	is intended for error observation and checking "on fly". For it added
+	instance-variables: overall_epnum, is_call_aM and error_threshold.
+
+	remove test error message from testNet(). Now the function returns
+	test error.
+
+24/09/99 Alexy Filin
+	added Cross-Entropy energy function, for it have written
+	mozgVector&operator*=(mozgVector&) in kernel library -- by
+	component vector product, changed compOutputErrors() and putLParams(),
+	in signature of last added energy function switch, also added auxiliary
+	mozgVector<mozgflt,mozgint> temp_vector.
+
+19/09/99 Alexy Filin
+	made network learning for random order of used learning examples, for
+	it added in learnNet() switch "successive/random" and in its signature
+	order -- parameter for the switch.
+
+18/09/99 Alexy Filin
+	added temperature of neuron's output function, to manage network
+	learning by sharpening/softening of the error surface, for it I added
+	temperature in MLPercetron class and compute_...(). It's very pleasant
+	to develop the good designed program, especially if you're its author.
+	Pardon me for some complacence :))).
+
+16/09/99 Alexy Filin
+	added bias term in the neuron's net, so added flag of bias term in
+	constructor of network to switch on/off the term, for it I put last
+	network's input equal to one in putInputs() and put last output of
+	each layer equal to one in propInputs(), testNet(), learnNet()
+	i.e. everywhere is used propLayer();
+
+	changed layers' learning rate, now they are computed by rule of fan-in
+	in putLParams().
+
+13/09/99 Alexy Filin
+	added flag_of_last_deltas in MLPercetron for removing of the memory
+	leakage	for n-fold call of putLParams();
+
+	renamed propInput() by propInputs().
+
+XX/08/99 Alexy Filin
+	passed exams to post-grad course :).
+
+///////////////////////////////////////////////////////////////////////////////
+////// mozg-0.3.5 /////////////////////////////////////////////////////////////
+
+21/07/99 Alexy Filin
+	made initialisation of last_deltas in 2.b) putLParams();
+
+	removed some bugs, many thanks to "efence" author Bruce Perens
+	(Bruce@Pixar.com).
+
+
+20/07/99 Alexy Filin
+	wrote types.hh, replaced float by mozgflt and int by mozgint for easy
+	change of floating {float,double,long double} and integer {int,
+	long,...} types;
+
+	wrote MLPOutFunc.[hh,cc] for easy inserting of nonstandard neuron's
+	output function, then in signatures of compute_...() function number
+	replaced by output function/its derivative pointer.
+
+19/07/99 Alexy Filin
+	simplified net constructor, now its signature:
+	MLPerceptron (int number_of_layers,
+                      int* num_outs_layers,
+                      int* func_number,
+                      float begin_weights_sigma);
+	
+	moved learning parameters initialisations in new functions:
+	putLParams (float learning_rate,
+                    float RBF_sigma_minimum) for "vanilla" backpropagation rule
+	putLParams (float RBF_sigma_minimum,
+		    float mom_term_coef,
+		    float lang_noise_begin_dispersion,
+		    float lang_noise_disp_decr_coef,
+		    float weight_decay_coef) for backprop with extensions;
+	
+	hid epoch and learning vector loops in learnNet (), its signature:
+	learnNet (float** linp,
+                  float** lout,
+                  int lssize,
+                  int epnum,
+                  int pepnum) learn network without testing,
+	learnNet (float** linp,
+                  float** lout,
+                  int lssize,
+                  int epnum,
+                  int pepnum,
+                  float** tinp,
+                  float** tout,
+                  int tssize); learn network with testing;
+
+	added
+	testNet (float** tinp,
+                 float** tout,
+                 int tssize)  for network test,
+	propInput (float* invec,
+                   float* outvec) propagate input vector through network,
+	propInput (float** invecarr,
+                   float** outvecarr,
+                   int ssize) propagate inp. vec. massive through network;
+	
+	added square error calculating flag in
+	compOutErrors (float* target,bool outerflag) for CPU time optimisation.
+	
+14/07/99 Alexy Filin
+	renamed interface functions:
+	PutInputs      -> putInputs,
+	GetOutputs     -> getOutputs,
+	PropLayer      -> propLayer,
+	PropForward    -> propForward,
+	CompOutErrors  -> compOutErrors,
+	BackPropErrors -> backpropErrors,
+	AdjustWeights  -> adjustWeights,
+	LearnNet       -> learnNet.
+	
+09/07/99 Alexy Filin
+	replaced instance-variables of the MLPerceptron flag_... by
+	auto-variables in adjust_lay_weights (...), it decreased CPU time =>
+	access time for instance-variables > access time for auto-variables
+	{in every case ?}; copied acconfig.h from ./include/ to ./;
+	
+28/06/99 Alexy Filin
+	removed const bool first_iteration from signature of
+	AdjustWeights(const bool),
+	the same for LearnNet(float*, const bool)
+	and adjust_lay_weights (...);
+	added const mozgVector<float,int>& lay_nets in signature of
+	compute_out_errors (...),
+	the same for compute_out_errors (...)
+	and compute_lay_errors (...);
+	added o_adjust_lay_weights(const layer& prev_layer, layer* cur_layer),
+	this is optimised adjust_lay_weights(...), removed all backpropagation
+	extensions from it;

@@ -1,0 +1,716 @@
+*******************************************************************************
+
+    Neural Network Library mozg
+    Copyright (C) 1999 Alexy Filin
+
+*******************************************************************************
+
+Contents
+=========
+
+  1. "Soft" rules.
+
+  2. mozg Programmer's guide.
+
+    2.1 mozgMLP class (interface functions).
+
+      2.1.1 Interface functions.
+
+      2.1.2 General draft of a network learning.
+
+      2.1.3 Code example of a network learning.
+
+      2.1.4 Code example of a saved net using.
+
+    2.2 How to insert another output function.
+
+      2.2.1 For net = sum(w_{ij}*y_j).
+
+      2.2.2 For RBF_net = -.5*sum(m_{ij}-y_j)^2/sigma_i^2.
+
+    2.4 How to change basic types.
+
+*******************************************************************************
+
+                         1. "Soft" rules
+                       =================
+
+        1. Chosen network inputs and outputs influence on learning results
+    considerably, for a bad case network can't be learned. There isn't guaranty
+    of good learning result for the task at all. Your experience is your
+    advicer.
+
+        2. Scale inputs and outputs [6], i.e. make transformation
+
+            new_input = ( old_input - old_input_min )
+                          / | old_input_max - old_input_min |
+
+    for output function of the OUTPUT layer that has range [0,1], or
+
+            new_input = 2 * ( old_input - old_input_min )
+                          / | old_input_max - old_input_min | - 1
+
+    for output function of the OUTPUT layer that has range [-1,1], the same for
+    outputs.
+
+
+        3. Divide your set of examples in two subset:
+             - learning set (is used for learning),
+             - test set (isn't used for learning)
+
+        4. Try to use "vanilla" backpropagation rule [4] (without extentions)
+    for learning parameters settings then optimised weights adjustment is used.
+      Momentum term and Langevin noise are used for "flat spot" elimi-
+    nation in errors-weights space [7]. When error derivative is too small for
+    learning by "vanilla" backpropagation, backpropagation rule extentions have
+    to be used. Langevin_sigma != 0 leads to N-FOLD CPU time increasing, only
+    use Langevin noise for your need.
+      Weight decay [4,7] is used for a network architecture optimisation, it
+    decreases absolute weights' values. It may lead to bad learning result.
+      Bias term may be very usefull sometimes.
+
+        5. The number of learning examples is recomended be >> the number of
+    network weights or ANN won't generalize [4], it will remember of learning
+    examples with their noise.
+
+        6. Usually three successive regions of test errors (errors for
+    examples not being used in learning) exist in the learning phase [6]:
+          - test error decreasing,
+          - test error optimal value,
+          - test error increasing (overfitting).
+
+NOTE: error for learning examples usually decreases all learning time, so test
+    error checking is very usefull for learning result observation (see code
+    example).
+        
+        7. Try to use different numbers of layers, numbers of hidden units,
+    output functions. Learning results may be very different.
+
+
+*******************************************************************************
+
+                   2. mozg Programmer's guide
+                  ============================
+
+      All parts of mozg have been placed in namespace mozg to escape
+    possibility of names conflict with joint used programs, so to use mozg you
+    have to write in your program "using namespace mozg;" or use mozg names
+    with qualificator "mozg::" if compilator has found names conflict.
+
+
+2.1 mozgMLP class (interface functions).
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.1.1 Interface functions of mozgMLP class:
+
+member-functions:
+
+        1. mozgMLP (int  number_of_layers,
+                    int* num_outs_layers,
+                    int* func_number,
+                    float weight_sweep,
+                    bool bias_term_flag);
+                         
+          int number_of_layers -- number of layers (including input layer),
+    it's usually enough three layers,sometimes four,
+
+          int* num_outs_layers -- pointer to the massive wich contains numbers
+    of units at layers; if the bias term is used, numbers of units in a layer
+    MUST INCLUDE one extra unit -- bias unit, which models bias input for the
+    next layer, that is
+
+                       units_number = real_units_number + 1,
+
+    EXCEPT output layer, which doesn't contain bias unit (because the layer is
+    last);
+
+NOTE: at the first layer the number of units also must include bias unit, but
+    network input vector dimension equals to the number of layer units WITHOUT
+    bias unit,
+
+          int* func_number -- pointer to the massive wich contains output
+    function numbers at layers. One can put it equal to:
+                                  
+              1 -- 1/(1+exp[-net/T]),
+              2 -- th(net/T),
+              3 -- net/T,
+              4 -- Radial Basis Function,
+              5 -- 2/Pi arctg(net/T),
+              0 -- user defined function(see 2.2.3 of the text),
+              6 -- user defined function(the same).
+
+    For example, { 0, 4, 2}:
+
+         0 on the input layer (it may be any, because there's no output
+    function at the layer),
+         4 at the hidden layer,
+         2 at the output layer,
+
+          float weight_sweep --  width of initial weight distribution,
+    bouth very small value and very large one leads to network failed to be
+    learned; try to use about 0.3;
+
+          bool bias_term_flag -- flag of bias term, true (1) for its switch
+    on and false (0) for its switch off; it is modeled by neuron's input, which
+    allways equals to one -- bias input; sometimes it can be usefull, for
+    example, for function approximation, without the term network's outputs is
+    zero for zero network's inputs and odd neuron's output function (atg, th)
+    so the net work can't approximate function not equaling to zero for all
+    zero inputs.
+
+    create network, if RBF isn't used, then RBF_sigma_min doesn't
+    influence on computations;
+
+
+        2. void putBackprop(float learning_rate     = .2, here and later it
+	                    mozgint rate_mode       = 0,  means default value
+                            float temperature       = 1.,
+		            int energy_function     = 1,
+                            int num_for_chunk       = 1,
+                            int steps_number        = 1);
+
+          float learning_rate -- common learning rate, usually value about 0.3
+   is a good one for usual Backprop, for chunk updating it must be much less
+   than one for non-chunk and weight decay is recomended, because weights
+   growing may be too large.
+
+          int rate_mode -- for choice of learning rates of layers:
+
+             0 -- equal:  layer's_eta = learning_rate,
+
+             1 -- fan-in: layer's_eta = learning_rate / layer's_inputs_number,
+
+          float temperature -- temperature in the output function, very small
+    value makes very sharp energy landscape, so learning can be lost in local
+    minima, very large one makes that too sloping and network is learned too
+    long, at first try to use 1,
+
+          int energy_function -- you can use following energy function:
+
+             1 -- summed squared error:
+                         E = sum_p sum_i (t_i^p-o_i)^2,
+
+             2 -- Cross-Entropy:
+                         E = - sum_p sum_i [(t_i^p-o_{min})*ln(o_i-g_{min})+
+                                            (o_{max}-t_i^p)*ln(g_{max}-o_i)],
+
+             3 -- log-squared error:
+                         E = - sum_p sum_i ln(1-(o_i-t_i^p)^2);
+
+          int num_in_chunk -- the number of learning examples at chunk. Usual
+    backprop uses one example in chunk.
+
+          int steps_number -- the number of steps per each chunk examples, i.e.
+    a learning example is used successivelly steps_number times for one epoch.
+    Note that learning error is added for last step, so it may be much less
+    than learning error for usual Backprop which used one step for one example,
+    but test error may be conversely even larger.
+
+    put learning parameters for the backpropagation learning rule without
+    extensions;
+
+
+        3. putQuickprop(float learning_rate     = .2,
+	                int rate_mode           = 0, 
+	                float temperature       = 1.,
+	                int energy_function     = 1,
+                        int num_for_chunk       = 1,
+	                int steps_number        = 10)
+
+          float learning_rate is used as learning rate for first step for each
+    learning example by backprop and as learning rate for first order term in
+    the Quickprop. Note that for the learning rule steps_number must be > 1,
+    because the rule requires partial derivatives of energy function for two
+    points of energy surface. If steps_number=1, backprop is used only.
+
+    put learning parameters for the Quickprop learning rule;
+
+
+        4. putRprop(float gamma_plus        = 1.02,
+	            float gamma_minus       = .5,
+	            float learning_rate     = .2,
+	            int rate_mode           = 0,
+	            float temperature       = 1.,
+	            int energy_function     = 1)
+
+          float gamma_plus and
+          float gamma_minus -- constants in the learning rule, must be
+    0 < gamma_minus < gamma_plus. In the learning value of each weight_etas is
+    checked and isn't changed if their absolute value go over of limit
+    max_weigh_etas, the last variable is instances-variables of class mozgMLP
+    with access public, its default value 1e-3 has been set in putRprop()
+    You may manualy change it as public instance-variable.
+      Learning rate must be much less (1e-4) than one for usual backprop and
+    weight decay is recommended.
+
+    put learning parameters for the Rprop learning rule;
+
+
+        5. void putExtensions(float mom_term_coef     = 0.,
+		              float lang_noise_begin_dispersion = 0.,
+		              float lang_noise_disp_decr_coef   = 0.,
+		              float weight_decay_coef = 0.);
+
+          float mom_term_coef -- momentum term coefficient(alpha) in
+    weight changing rule:
+
+             w_{ij,t+1} = w_{ij,t} + delta w_{ij,t} =
+                        = w_{ij}(t) + ... + alpha * delta w_{ij,t-1}
+
+    is recomended to be in interval 0...1.
+
+	  float lang_noise_begin_dispersion begin value of the dispersion of
+    the Langevin noise(Gauss noise) term in a weight changing rule:
+
+             w_{ij,t+1} = w_{ij,t} + ... + noise_term.
+
+    It must be sufficiently small for successful learning.
+
+	  float lang_noise_disp_decr_coef -- decreasing coefficient of the
+    Langevin dispersion in learning phase:
+
+             Langevin_sigma_{t+1} =
+                          = Langevin_sigma_{t} * lang_noise_disp_decr_coef
+
+    where t+1 -- next call of the AdjustWeights(). It must be putted
+    approximatly 0.99, surely, in [0,1).
+
+	  float weight_decay_coef -- weight decay coefficient for decay term in
+    a weight changing rule:
+
+             w_{ij,t+1} = w_{ij,t} + ... -
+                                - weight_decay_coef * w_{ij,t}.
+
+    It must be about 1e-5 or less, then a network can be learned;
+
+    put extensions parameters;
+ 
+ALL RECOMENDED VALUES INTEND FOR NORMALIZED INPUTS AND OUTPUTS (see "Soft"
+rules).
+
+NOTE: you may don't call the function 2., 3., 4., 5. then default values is
+    used for learning (initiation is made by the constructor):
+
+           switch_of_learn_rule      = 1;
+           switch_of_energy_function = 1;
+           error_threshold           = 0.;
+           rate_coeff                = 1.;
+           gain_coeff                = 1.;
+
+    and Backprop default parameters are used;
+
+
+        6.a) void learnNet (float* linputs,
+                            float* loutputs)
+
+          float* linputs  -- pointer to massive of inputs,
+          float* loutputs -- pointer to massive of outputs,
+
+    learn net for the learning example (one error backpropagation), by the
+    function you can self choose order of learning examples in epochs;
+
+
+          b) void learnNet (float** linputs,
+                            float** loutputs,
+                            int lssize,
+		            int vec_order
+                            int epnum,
+                            int pepnum)
+
+          float** linputs  -- pointer to massive of input massives,
+          float** loutputs -- pointer to massive of output massives,
+          int lssize       -- size of learning set (the number of input or
+    output vectors),
+
+          int vec_order may take values:
+
+             1) vec_order = 1 -- in successive order of learning examples given
+    by the array, one error backpropagation for each learning  example in epoch
+    is used,
+
+	     2) vec_order = 0 -- in random order of learning examples (regular
+    distribution is used), that helps to improve network generalisation; in the
+    case some examples will be used larger and some less number of times, but
+    common number of error backpropagation is equal to one in 1);
+
+          int epnum -- the being believed number of epoch for the learning,
+
+          int pepnum -- each pepnum-th epoch answerMessage() is called, what
+    allows to check the learning.
+
+NOTE: learning error isn't the mean squared error on learning set, it is the
+    mean of output network's error squares for the learning set:
+
+             learning_error = sum_i(target_i-realouput_i)^2 / lssize
+
+    where target_i   -- i-th target output vector,
+          realoutput -- i-th real output vector
+    and each sum's term is calculated after a weights update,
+
+    learn network by initiated learning rule;
+
+
+          c) void learnNet (float** linputs,
+                            float** loutputs,
+                            int lssize,
+		            int vec_order,
+                            int epnum,
+                            int pepnum,
+                            float** tinputs,
+                            float** toutputs,
+                            int tssize);
+
+          float** tinputs  -- pointer to massive of test input massives,
+          float** toutputs -- pointer to massive of test output massives,
+          int lssize       -- size of test set (the number of test input or
+    output vectors),
+
+    learn network (one error backpropagation for each learning example), each
+    pepnum-th epoch answerMessage() is called.
+
+NOTE: test error is real mean squared error on test set:
+
+             test_error = (sum_i(target_i-realoutput_i)^2) / tssize ,
+
+    where i (= 1...tssize) -- the number of test examples,
+             target_i   -- i-th target output vector,
+             realoutput -- i-th real output vector,
+
+
+        7. float testNet (float** tinp,
+                          float** tout,
+                          int tssize);
+
+          float** tinputs  -- pointer to massive of test input massives,
+          float** toutputs -- pointer to massive of test output massives,
+          int lssize       -- size of test set (the number of test input or
+    output vectors),
+
+    test network and return test error.
+
+NOTE: test error is real mean squared error on test set,
+
+
+        8.a) void propInputs (float* invec,
+                              float* outvec);
+
+          float* invec  -- pointer to massive of inputs,
+          float* outvec -- pointer to massive of outputs (allocated by
+    programmer),
+
+    propagate input vector invec through network and place output vector in
+    outvec;
+
+          b) void propInputs (float** invecarr,
+                              float** outvecarr,
+                              int ssize);
+
+          float** tinputs  -- pointer to massive of input massives,
+          float** toutputs -- pointer to massive of output massives (allocated
+    by programmer),
+          int ssize        -- size of set (the number of input or output
+    vectors),
+
+    propagate input vector massive through network and place output vector
+    massive in outvecarr;
+
+
+not member-functions:
+
+        9. output << net
+
+          ofstream& output -- output file stream,
+          mozgMLP& net     -- network to be saved,
+
+    save the network in a file,
+
+
+        10. input >> p_p_net
+
+          ifstream& input   -- input file stream,
+          mozgMLP** p_p_net -- address of the pointer to the network,
+
+    load the network from a file,
+
+NOTE: network is loaded to the dynamic memory wich is allocated in the 
+    operator-function, so you self must destroy the network if it isn't need
+    yet;
+
+
+        11. output << net
+
+          ostream& output -- output stream (cout),
+          mozgMLP& net    -- network to be written in the output,
+
+    show the network.
+
+
+PLEASE DEFINE THE MEMBER-FUNCTION(if you use learnNet() b) or c)):
+
+        12. bool answerMessage(float learn_error,
+			       float test_error)
+
+          float learn_error and
+          float test_error -- values of learning and test errors being sent
+   by learnNet()  b) or c) each pepnum-th epoch.
+
+     The function is intended for error checking and management of learning
+   "on fly". It is called by learnNet b),c) each pepnum-th epoch and get
+   learning error and test error if it is calculated. If test error isn't cal-
+   culated (for learnNet b)) zero is put in second signature parameter of the
+   function. If you like graphics use a graphic library then you can admire
+   learning in real time.
+
+     The function MUST RETURN:
+
+       - true if network learning must be ended (error is small enough), then
+   return from learnNet() takes place;
+       - false in the other case (continue the learning).
+
+     A simple example:
+
+        bool mozgMLP::answerMessage(float learn_error,
+        			    float test_error)
+        {
+          cout << "Overall number of epoch since learning beginning: "
+        // overall_epnum -- instance-variable of mozgMLP class (float)
+               << overall_epnum << endl
+               << "  learning error: " << learn_error << endl
+               << "  test error    : " << test_error << endl;
+
+        // is_call_aM -- instance-variable of mozgMLP class (bool);
+        // to enter test error once
+          if (!is_call_aM) {
+            is_call_aM = true;
+            cout << "Enter test error which can be allowed: ";
+
+        // error_threshold -- instance-variable of mozgMLP class (float)
+            cin >> error_threshold;
+          }
+          return (test_error < error_threshold);
+        }
+
+    I don't use static variables in answerMessage() instead of
+    instance-variables overall_epnum, is_call_aM and error_threshold, because
+    I had troubles with them. When I had made several networks, static
+    variables was common. Please, don't forget it, if you want to use static
+    variables in a member-function.
+      In learning process you can change some learning parameters, learning
+    rate or temperature for each layer except input one, for it you just write
+    in answerMessage():
+
+          if (!is_call_aM) {
+
+            is_call_aM = true;
+            cout << "Enter rate_coeff and gain_coeff:";
+            cin >> rate_coeff >> gain_coeff;
+          }
+
+          for (int i=1; i<num_layers; i++) {
+
+            layers[i].rate *= rate_coeff;
+            layers[i].gain *= gain_coeff;
+          }
+
+NOTE: you may continue learning of the network by another call of learnNet
+    (any from a),b),c)) then overall_epnum DOESN'T be zeroed and equals to
+    overall number of epochs for several call of learnNet().
+
+
+2.1.2 General draft of a network learning.
+
+      I.   Network initiation by the constructor (function 1).
+
+     *II.  Initiation of a learning rule (functions 2, 3, 4).
+
+     *III. Initiation of extensions (function 5).
+
+      IV.  Learning of a network (function 6).
+
+     *V.   Network saving (function 9).
+
+     *VI.  Repeating if it's need II, III, IV, V for the network.
+
+    where "*" means optional.
+
+    You can save network till next time you will learn it (learning is too long
+    and you must switch of the computer to go on your holiday) and then (after
+    the nice holiday) load it by function 10 to continue the learning.
+
+    Also if a learning result is very costly for you or de-energizations happen
+    often you may save network by call of function 10 in answerMessage() which
+    is called regularly each pepnum-th epoch to be sure in safe keeping of a
+    intermediate learning result. Don't forget write to TWO files in turn, not
+    to ONE! Else if energy will be off during the writing, you may lose the
+    previous learning result.
+
+
+2.1.3 Code example of a network learning:
+
+        ...
+
+        float** learning_set_inputs;
+        float** learning_set_outputs;
+        float** test_set_inputs;
+        float** test_set_outs;
+        float   eta;
+        float   weight_sweep;
+        float   learning_rate;
+        float   temperature;
+
+        int  number_layers;
+        int* num_of_outputs_at_layers;
+        int* num_of_output_f;
+	int  num_for_chunk_updating;
+        int  learning_set_size;
+        int  vec_order;
+        int  rate_mode;
+        int  energy_function;
+        int  steps_number;
+
+        bool flag_of_bias_term;
+
+        // Initiation of inputs & outputs vector arrays
+        ...
+
+        // Enter of parameters of network and its learning.
+        params_input (...);
+
+        // Network is created:
+        mozgMLP net (number_layers,
+                     num_of_outputs_at_layers,
+                     num_of_output_f,
+                     weight_sweep,
+                     flag_of_bias_term);
+
+        // Learning parameters initiation:
+        net.putBackprop (learning_rate,
+                         rate_mode,
+                         temperature,
+		         energy_function,
+                         num_for_chunk_updating,
+                         steps_number);
+
+        // Network is learned:
+        net.learnNet (learning_set_inputs,
+                      learning_set_outputs,
+                      learning_set_size,
+                      vec_order,
+                      epoch_num,
+                      print_epoch_num,
+                      test_set_inputs,
+                      test_set_outs,
+                      test_set_size);
+
+
+        // and is saved:
+        bool flag_of_saving;
+        char net_file_name[100];
+
+        cout << "Save network? (yes-1, no-0)";
+        cin >> flag_of_saving;
+
+        if (flag_of_saving) {
+
+          cout << "Enter file name network must be saved in: ";
+          cin >> net_file_name;
+
+          ofstream out_file (net_file_name);
+          out_file << net;
+        }
+        ...
+
+2.1.4 Code example of a saved net using:
+
+        float* set_inputs;
+        float* input_vec;
+        float* output_vec;
+        ...
+
+        mozgMLP* p_net;
+
+        ifstream from_file (net_file_name);
+
+        from_file >> &p_net;
+
+        // I want to see loaded net...
+        cout << *p_net;
+
+        output_vec = new float[num_outs];
+
+        p_net->propInputs (input_vec,
+                           output_vec);
+
+        delete p_net;
+        ...
+
+
+2.2 How to insert another output function.
+
+    All you need to insert another output function is to write in math.cc
+    desirable function, its derivative  and recompile mozg. Below I've
+    considered two case, the case of weighted inputs net and the case of RBF
+    net.
+
+        1. For weighted input sum, net = sum(w_{ij}*y_j) you must write
+    desirable output function in mozgweinet(net,sigm) and its derivative in
+    mozgDweinet(out,net,sigm) (see math.cc).
+
+      For example, you want to insert y = sin(net), then you must write in
+    mozgweinet (net,sigm):
+
+	  mozgflt mozgweinet (mozgflt net,mozgflt sigm)
+	  { return sin(net); }
+
+    Then, because of y' = cos(x) = sqrt(1-y^2), you must write in the
+    mozgDweinet (out,net,sigm):
+
+	  mozgflt mozgDweinet (mozgflt out,mozgflt net,mozgflt sigm)
+	  { return cos(net); }
+
+    or (for some functions using of "out" instead of "net" is more convenient)
+
+	  mozgflt mozgDweinet (mozgflt out,mozgflt net,mozgflt sigm)
+	  { return sqrt(1 - out * out); }
+
+        2. If you want to use RBFnet = -.5*sum(m_{ij}-y_j)^2/sigma_i^2, for
+    example y = sin(RBFnet), you must write in mozgrbfnet (RBFnet,sigm):
+
+	  mozgflt mozgrbfnet (mozgflt RBFnet,mozgflt sigm)
+	  { return sin(-.5 * RBFnet / (sigm * sigm)); }
+
+    and, because of y' = cos(RBFnet) = sqrt(1-y^2), you must write in the
+    mozgDrbfnet (out,RBFnet,sigm):
+
+	  mozgflt mozgDrbfnet (mozgflt out,mozgflt RBFnet,mozgflt sigm)
+	  { return cos(-.5 * RBFnet / (sigm * sigm)); }
+
+    or(for some functions using of out instead of RBFnet is more convenient)
+
+	  mozgflt mozgDrbfnet (mozgflt out,mozgflt RBFnet,mozgflt sigm)
+	  { return sqrt(1 - out * out) / (sigm * sigm); }
+
+NOTE: If you use non-standard output function on output layer and cross-entropy
+    error function then after mozgMLP() and before learnNet() calls you
+    must call the function to put two parameters:
+
+        13. void putNStdFuncParams (float min,
+                                    float max)
+
+          min -- minimum value of non-standard output function,
+          max -- maximum value of non-standard output function, i.e. range
+    of its function equals to (min,max) or [min,max]. If you won't have done it
+    you will have gotten an error message.
+
+      For frequent change of output function it is better to extract math.cc
+    from the library only to recompile it after each change of output function.
+
+
+2.3 How to change basic types.
+
+    If you want to change basic variable types "float" by "double" (for example
+    for precision increasing) and "int" by "long", you need to replace
+    "float" by "double" and "int" by long in "types.hh" and recompile mozg.
+    Then ALL mozg's "float" types will have been replaced by "double" types
+    and ALL "int" types will have been replaced by "long" types.
+
+*******************************************************************************
