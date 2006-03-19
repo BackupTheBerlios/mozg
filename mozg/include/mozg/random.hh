@@ -1,4 +1,4 @@
-// $Id: random.hh,v 1.1 2006/03/18 21:53:18 lightdruid Exp $
+// $Id: random.hh,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
 // random.hh
 // some functions for generating random distributions
 //
@@ -35,29 +35,27 @@
 namespace mozg {
 
 // Random number generator of Park and Miller
-  extern mozgflt ran1(long* idum);
+extern mozgflt ran1(long* idum);
 
 // It returns random regulary distributed in [argmin,argmax] number
-  extern mozgflt random_number(const mozgflt argmin,
-			       const mozgflt argmax);
+extern mozgflt random_number(const mozgflt argmin, const mozgflt argmax);
 
 // It returns a normally distributed deviate with zero mean 
 // and unit variance
-  extern mozgflt gasdev();
+extern mozgflt gasdev();
 
 // It returns random normally distributed values with sigma dispersion
-  extern mozgflt gauss(const mozgflt sigma);
+extern mozgflt gauss(const mozgflt sigma);
 
 // It returns random normally distributed values with sigma dispersion and 
 // mean value mean
-  extern mozgflt gauss(const mozgflt sigma,
-		       const mozgflt mean);
+extern mozgflt gauss(const mozgflt sigma, const mozgflt mean);
 
 // It returns random regular distributed signum
-  extern mozgflt rand_signum();
+extern mozgflt rand_signum();
 
 // It returns signum (Heaviside step function)
-  extern mozgflt mozg_heaviside(const mozgflt number);
+extern mozgflt mozg_heaviside(const mozgflt number);
 
 }
 

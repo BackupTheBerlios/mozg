@@ -1,4 +1,4 @@
-// $Id: errorMessage.hh,v 1.1 2006/03/18 21:53:18 lightdruid Exp $
+// $Id: errorMessage.hh,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
 // errorMessage.hh
 // Handle with debug error (sizes mismatches)
 //
@@ -34,8 +34,7 @@
 
 namespace mozg {
 
-  extern void sendErrorMessage(char* message,
-			       int err_num);
+extern void sendErrorMessage(char* message, int err_num);
 
 }
 

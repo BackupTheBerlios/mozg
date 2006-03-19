@@ -1,4 +1,4 @@
-// $Id: vector_matrix_io.hh,v 1.1 2006/03/18 21:53:18 lightdruid Exp $
+// $Id: vector_matrix_io.hh,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
 // vector_matrix_io.hh
 // Kernel library, i/o functions
 //
@@ -38,29 +38,23 @@
 
 namespace mozg {
 
-  template <class vec_t, class vec_size_t>
-    std::ofstream& operator << (std::ofstream& output,
-			   const vector<vec_t,vec_size_t>& vector);
+template< class vec_t,class vec_size_t> std::ofstream& operator <<(std::ofstream& output,
+    const vector< vec_t,vec_size_t>& vector);
 
-  template <class vec_t, class vec_size_t>
-    std::ifstream& operator >> (std::ifstream& input,
-			   vector<vec_t,vec_size_t>& vector);
+template< class vec_t,class vec_size_t> std::ifstream& operator >>(std::ifstream& input,
+    vector< vec_t,vec_size_t>& vector);
 
-  template <class vec_t, class vec_size_t>
-    std::ostream& operator << (std::ostream& output,
-			  const vector<vec_t,vec_size_t>& vector);
+template< class vec_t,class vec_size_t> std::ostream& operator <<(std::ostream& output,
+    const vector< vec_t,vec_size_t>& vector);
 
-  template <class matr_t, class matr_size_t>
-    std::ofstream& operator << (std::ofstream& output,
-			   const matrix<matr_t,matr_size_t>& matr);
+template< class matr_t,class matr_size_t> std::ofstream& operator <<(std::ofstream& output,
+    const matrix< matr_t,matr_size_t>& matr);
 
-  template <class matr_t, class matr_size_t>
-    std::ifstream& operator >> (std::ifstream& output,
-			   matrix<matr_t,matr_size_t>& matr);
+template< class matr_t,class matr_size_t> std::ifstream& operator >>(std::ifstream& output,
+    matrix< matr_t,matr_size_t>& matr);
 
-  template <class matr_t, class matr_size_t>
-    std::ostream& operator << (std::ostream& output,
-			  const matrix<matr_t,matr_size_t>& matr);
+template< class matr_t,class matr_size_t> std::ostream& operator <<(std::ostream& output,
+    const matrix< matr_t,matr_size_t>& matr);
 
 }
 

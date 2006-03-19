@@ -1,4 +1,4 @@
-// $Id: limits.hh,v 1.1 2006/03/18 21:53:18 lightdruid Exp $
+// $Id: limits.hh,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
 // limits.hh
 // mozg limits for weights, sigmas (RBF),...
 // 
@@ -34,18 +34,18 @@
 
 namespace mozg {
 
-  extern mozgflt MAX_ABS_WEIGHT;
-  extern mozgflt MIN_ABS_WEIGHT;
-  extern mozgflt MAX_ABS_SIGMA;
-  extern mozgflt MIN_ABS_SIGMA;
-  extern mozgflt MAX_ABS_LAST_DELTA;
-  extern mozgflt MIN_ABS_LAST_DELTA;
-  extern mozgflt MAX_ABS_SIGMA_LAST_DELTA;
-  extern mozgflt MIN_ABS_SIGMA_LAST_DELTA;
-  extern mozgflt MAX_ABS_WEIGHT_ETA;
-  extern mozgflt MIN_ABS_WEIGHT_ETA;
-  extern mozgflt MAX_ABS_SIGMA_ETA;
-  extern mozgflt MIN_ABS_SIGMA_ETA;
+extern mozgflt MAX_ABS_WEIGHT;
+extern mozgflt MIN_ABS_WEIGHT;
+extern mozgflt MAX_ABS_SIGMA;
+extern mozgflt MIN_ABS_SIGMA;
+extern mozgflt MAX_ABS_LAST_DELTA;
+extern mozgflt MIN_ABS_LAST_DELTA;
+extern mozgflt MAX_ABS_SIGMA_LAST_DELTA;
+extern mozgflt MIN_ABS_SIGMA_LAST_DELTA;
+extern mozgflt MAX_ABS_WEIGHT_ETA;
+extern mozgflt MIN_ABS_WEIGHT_ETA;
+extern mozgflt MAX_ABS_SIGMA_ETA;
+extern mozgflt MIN_ABS_SIGMA_ETA;
 
 
 }

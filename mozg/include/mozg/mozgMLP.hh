@@ -1,4 +1,4 @@
-// $Id: mozgMLP.hh,v 1.1 2006/03/18 21:53:18 lightdruid Exp $
+// $Id: mozgMLP.hh,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
 // mozgMLP.hh
 // Multi-Layer Perceptron (mozgMLP) simulator class
 //
@@ -42,40 +42,39 @@
 
 namespace mozg {
 
-  class mozgMLP {
+class mozgMLP {
+public:
 
-  public:
-
-// PLEASE DEFINE THE MEMBER-FUNCTION(if you use learnNet b) or c)).
-// The function (called reverse call function) is called by learnNet b),c)
-// which send it overall number of epoch since learning begin, learning error
-// and test error if it is calculated; if test error isn't calculated (for
-// learnNet b)) zero is put in second signature parameter of the function.
-// The function MUST RETURN true if network learning must be ended (error is
-// small enough) then return from learnNet() happens and false in the other
-// case.
-    bool answerMessage (mozgflt,  // learning error
-			mozgflt); // test error
+    // PLEASE DEFINE THE MEMBER-FUNCTION(if you use learnNet b) or c)).
+    // The function (called reverse call function) is called by learnNet b),c)
+    // which send it overall number of epoch since learning begin, learning error
+    // and test error if it is calculated; if test error isn't calculated (for
+    // learnNet b)) zero is put in second signature parameter of the function.
+    // The function MUST RETURN true if network learning must be ended (error is
+    // small enough) then return from learnNet() happens and false in the other
+    // case.
+    bool answerMessage(mozgflt, // learning error
+            mozgflt); // test error
 
     struct_layer* layer;          // pointer to the massive of network layers
 
     mozgint identificator;        // identificator of network
     mozgint switch_of_learn_rule; // number of learning rule by which network
-                                  //   is ready to be learned
+    //   is ready to be learned
 
     mozgint switch_of_energy_function; // network's energy function
-                                       // (called error function)
+    // (called error function)
     mozgint layers_num;         // the number of layers (including input layer)
     mozgint overall_epnum;      // Overall number of epoch since learning begin
     mozgint nonstand_func_type; // number of nonstandart function range
     mozgint steps_num;          // number of steps for an example in second
-                                // order algorithm
+    // order algorithm
 
     mozgint chunk;              // number of examples for chunk learning
 
-    vector<mozgflt,mozgint>* diff;  // difference between desiring and
-                                    // real output vectors, NOT FOR
-                                    //  Cross-Entropy and log-square error
+    vector< mozgflt,mozgint>* diff;  // difference between desiring and
+    // real output vectors, NOT FOR
+    //  Cross-Entropy and log-square error
 
     mozgflt alpha;                   // momentum term coefficient
     mozgflt sigma_Langevin;          // Langevin Gauss begin sigma
@@ -86,214 +85,214 @@ namespace mozg {
     mozgflt gammaplus;               // constants in Qprop learning
     mozgflt gammaminus;              //   rule
     mozgflt begin_weight_etas;       // weight etas for Rprop in learning
-                                     // start 
+    // start 
 
     mozgflt error_over_outputs;     // square of a output error vector module
     mozgflt error_threshold;        // learning or test error which can be
-                                    // allowed to finish learning
+    // allowed to finish learning
 
     mozgflt nonstandfunc_min;   // maximum of nonstandart output function
     mozgflt nonstandfunc_max;   // its minimum, bouth value is need for
-                                // cross-entropy error function
+    // cross-entropy error function
 
     bool flag_of_bias_term;     // flag of bias term, public! (for << and >> )
 
-// create network
-    mozgMLP (mozgint,        //  number of layers (including input layer)
-	     mozgint*,       //  number of units in layers (massive)
-	     mozgint*,       //  output function numbers at layers (massive)
-	     mozgflt,        //  sweep of weight randomization
-	     bool);          //  flag of bias term
+    // create network
+    mozgMLP(mozgint, //  number of layers (including input layer)
+         mozgint*, //  number of units in layers (massive)
+         mozgint*, //  output function numbers at layers (massive)
+         mozgflt, //  sweep of weight randomization
+         bool);          //  flag of bias term
 
-// delete network
-    virtual ~mozgMLP ();
+    // delete network
+    virtual ~mozgMLP();
 
-// put learning parameters for "vanilla" backpropagation rule
-    void putBackprop (mozgflt,  // (D=.2) common learning rate
-		      mozgint,  // (D=0) mode of layers' rates calculation
-		      mozgflt,  // (D=1.) temperature 
-		      mozgint,  // (D=1) switch of energy function
-		      mozgint,  // (D=1) the number of examples in chunk
-		      mozgint); // (D=1) number of iterations per learning
-                                // example
+    // put learning parameters for "vanilla" backpropagation rule
+    void putBackprop(mozgflt, // (D=.2) common learning rate
+              mozgint, // (D=0) mode of layers' rates calculation
+              mozgflt, // (D=1.) temperature 
+              mozgint, // (D=1) switch of energy function
+              mozgint, // (D=1) the number of examples in chunk
+              mozgint); // (D=1) number of iterations per learning
+    // example
 
-// put parameters for rule with extensions 
-    void putExtensions (mozgflt,  // (D=.3) momentum term coefficient
-			mozgflt,  // (D=0.) begin Langevin dispersion
-			mozgflt,  // (D=0.) Langevin dispersion decreasing coef
-			mozgflt); // (D=0.) weight decay coefficient
+    // put parameters for rule with extensions 
+    void putExtensions(mozgflt, // (D=.3) momentum term coefficient
+            mozgflt, // (D=0.) begin Langevin dispersion
+            mozgflt, // (D=0.) Langevin dispersion decreasing coef
+            mozgflt); // (D=0.) weight decay coefficient
 
-// put learning parameter for Qprop
-    void putQuickprop (mozgflt,  // (D=.2) common learning rate
-		       mozgint,  // (D=0) mode of layers' rates 
-		       mozgflt,  // (D=1.) temperature
-		       mozgint,  // (D=1) energy function switch
-		       mozgint,  // (D=1) the number of examples in chunk
-		       mozgint); // (D=10) number of iterations
-                                 //  per learning example
-		   
-// put learning parameters for Rprop
-    void putRprop (mozgflt,  // (D=1.2) constant in learning rule
-		   mozgflt,  // (D=.5)  (the same)
-		   mozgflt,  // (D=.2)  common learning rate
-		   mozgint,  // (D=0)   mode of layers' rates calculation
-		   mozgflt,  // (D=1.)  temperature
-		   mozgint); // (D=1)   switch of energy function
-		   
-// learn network
-    void learnNet (mozgflt*,  // learning input vector
-		   mozgflt*); // learning output vector
+    // put learning parameter for Qprop
+    void putQuickprop(mozgflt, // (D=.2) common learning rate
+               mozgint, // (D=0) mode of layers' rates 
+               mozgflt, // (D=1.) temperature
+               mozgint, // (D=1) energy function switch
+               mozgint, // (D=1) the number of examples in chunk
+               mozgint); // (D=10) number of iterations
+    //  per learning example
 
-// learn network
-    void learnNet (mozgflt**, // learning input vector array
-		   mozgflt**, // learning output vector array
-		   mozgint,   // learning set size
-		   mozgint,   // order of vectors used in learning
-		   mozgint,   // number of epochs network must be learned
-		   mozgint);  // answerMessage() is called for each pepnum-th 
-                              // epoch
+    // put learning parameters for Rprop
+    void putRprop(mozgflt, // (D=1.2) constant in learning rule
+           mozgflt, // (D=.5)  (the same)
+           mozgflt, // (D=.2)  common learning rate
+           mozgint, // (D=0)   mode of layers' rates calculation
+           mozgflt, // (D=1.)  temperature
+           mozgint); // (D=1)   switch of energy function
 
-// learn and test network
-    void learnNet (mozgflt**, // learning input vector array
-		   mozgflt**, // learning output vector array
-		   mozgint,   // learning set size
-		   mozgint,   // order of vectors used in learning
-		   mozgint,   // number of epochs network must be learned
-		   mozgint,   // answerMessage() is called for each pepnum-th
-		              // epoch
-		   mozgflt**, // test input vector array
-		   mozgflt**, // test output vector array
-		   mozgint);  // test set size
+    // learn network
+    void learnNet(mozgflt*, // learning input vector
+           mozgflt*); // learning output vector
 
-// test network, returns mean square error over test set
-    mozgflt testNet (mozgflt**, // test input vector array
-		     mozgflt**, // test output vector array
-		     mozgint);  // test set size
+    // learn network
+    void learnNet(mozgflt**, // learning input vector array
+           mozgflt**, // learning output vector array
+           mozgint, // learning set size
+           mozgint, // order of vectors used in learning
+           mozgint, // number of epochs network must be learned
+           mozgint);  // answerMessage() is called for each pepnum-th 
+    // epoch
 
-// propagate input vector forward through network to the outputs and save
-// outputs in the outvec
-    void propInputs (mozgflt*,  // inputs
-		     mozgflt*); // outputs
+    // learn and test network
+    void learnNet(mozgflt**, // learning input vector array
+           mozgflt**, // learning output vector array
+           mozgint, // learning set size
+           mozgint, // order of vectors used in learning
+           mozgint, // number of epochs network must be learned
+           mozgint, // answerMessage() is called for each pepnum-th
+                      // epoch
+           mozgflt**, // test input vector array
+           mozgflt**, // test output vector array
+           mozgint);  // test set size
 
-// propagate vectors of the invecarr forward through network to the outputs
-// and save outputs for each vector in outvecarr
-    void propInputs (mozgflt**, // array of input vectors
-		     mozgflt**, // array of output vectors
-		     mozgint);  // the number of input vector
+    // test network, returns mean square error over test set
+    mozgflt testNet(mozgflt**, // test input vector array
+             mozgflt**, // test output vector array
+             mozgint);  // test set size
 
-// initialise non-standart output function parameters (only if it on output
-// layer and cross-entropy is used). If function hasn't been called, error
-// message is printed (see before_exception.cc)
-    void putNonStdFunction (mozgflt,  // minimum of output function
-			    mozgflt); // maximum of output function
+    // propagate input vector forward through network to the outputs and save
+    // outputs in the outvec
+    void propInputs(mozgflt*, // inputs
+             mozgflt*); // outputs
+
+    // propagate vectors of the invecarr forward through network to the outputs
+    // and save outputs for each vector in outvecarr
+    void propInputs(mozgflt**, // array of input vectors
+             mozgflt**, // array of output vectors
+             mozgint);  // the number of input vector
+
+    // initialise non-standart output function parameters (only if it on output
+    // layer and cross-entropy is used). If function hasn't been called, error
+    // message is printed (see before_exception.cc)
+    void putNonStdFunction(mozgflt, // minimum of output function
+                mozgflt); // maximum of output function
 
 
-  protected:
+protected:
 
-    vector<mozgflt,mozgint>* temp_vector;  // for Cross-Entropy function
-    vector<mozgflt,mozgint>* temp_vector2; // the same & non-standard
-                                           //  output function on output
-                                           // layer
+    vector< mozgflt,mozgint>* temp_vector;  // for Cross-Entropy function
+    vector< mozgflt,mozgint>* temp_vector2; // the same & non-standard
+    //  output function on output
+    // layer
 
-// neuron output functions (see math.hh)
+    // neuron output functions (see math.hh)
     static const OUT_FUNC output_func[7];
 
-// neuron output functions derivatives (see math.hh)
+    // neuron output functions derivatives (see math.hh)
     static const OUT_FUNC_DERIV output_func_deriv[7];
 
 
-// links between dynamic memory consumers and memory_manager()
-    vector<mozgint,mozgint>* real_memory;
-    vector<mozgint,mozgint>* necessary_memory;
-    vector<mozgint,mozgint>* net_memory;
+    // links between dynamic memory consumers and memory_manager()
+    vector< mozgint,mozgint>* real_memory;
+    vector< mozgint,mozgint>* necessary_memory;
+    vector< mozgint,mozgint>* net_memory;
 
-// allocates memory by request (necessary_memory) and makes garbage collection
-    void memory_manager (mozgint); // 0 - usual call, 1 -  call destroying
-                                   // network
-
-
-// put net_inputs to the net inputs
-    void put_inputs (mozgflt*); // pointer to array of network inputs
-
-// propagate layer's inputs through the layer
-    void compute_lay_outputs (const struct_layer&, // layer where signal
-			                           // go from
-			      struct_layer*);      // layer where signal go to
-
-// put last layer outputs to the net_outputs
-    void get_outputs (mozgflt*) const; // pointer to array where put network
-                                       // output to
-
-// compute errors for last layer
-    void compute_output_errors (mozgflt*, // desirable outputs
-				bool);    // compute_output_errors flag
-
-// compute neuron errors for the current layer
-    void compute_lay_errors (const struct_layer&, // previous layer
-			     const matrix<mozgflt,mozgint>&,// weights of
-			                          // previous layer
-			     struct_layer*);      // current layer
-
-// propagate errors from last layer to first one
-    void backprop_errors ();
-
-// update weights for current layer
-    void adjust_lay_weights (const struct_layer&, // previous layer
-			     struct_layer*);      //  current layer
-
-// adjust weights for current layer in chunk learning
-    void adjust_chunk_lay_weights (const struct_layer&, // previous layer
-				   struct_layer*);      //  current layer
+    // allocates memory by request (necessary_memory) and makes garbage collection
+    void memory_manager(mozgint); // 0 - usual call, 1 -  call destroying
+    // network
 
 
-// optimised adjust_lay_weights (), without error backprop extentions
-    void o_adjust_lay_weights (const struct_layer&, // previous layer
-			       struct_layer*);      //  current layer
+    // put net_inputs to the net inputs
+    void put_inputs(mozgflt*); // pointer to array of network inputs
 
-// optimised adjust weights for current layer in chunk learning
-    void o_adjust_chunk_lay_weights (const struct_layer&, // previous layer
-				     struct_layer*);      //  current layer
+    // propagate layer's inputs through the layer
+    void compute_lay_outputs(const struct_layer&, // layer where signal
+                                       // go from
+                  struct_layer*);      // layer where signal go to
 
-    
-// compute partial derivative of error function for the current layer
-    void compute_lay_pderivs (const struct_layer&, // previous layer
-			      const struct_layer&, // next layer
-			      const matrix<mozgflt,mozgint>&,// weights of
-			                           // previous layer
-			      struct_layer*);      //  current layer
+    // put last layer outputs to the net_outputs
+    void get_outputs(mozgflt*) const; // pointer to array where put network
+    // output to
 
-// compute partial derivative of error function
-    void compute_partial_derivatives ();
+    // compute errors for last layer
+    void compute_output_errors(mozgflt*, // desirable outputs
+                bool);    // compute_output_errors flag
 
-// adjust netowrk's weights by backprop
-    void adjust_weights_by_backprop ();
+    // compute neuron errors for the current layer
+    void compute_lay_errors(const struct_layer&, // previous layer
+                 const matrix< mozgflt,mozgint>&, // weights of
+                                      // previous layer
+                 struct_layer*);      // current layer
 
-// adjust netowrk's weights by backprop
-    void adjust_weights_by_quickprop (mozgint step_number);
+    // propagate errors from last layer to first one
+    void backprop_errors();
 
-// adjust netowrk's weights by backprop
-    void adjust_weights_by_rprop (mozgint step_number);
+    // update weights for current layer
+    void adjust_lay_weights(const struct_layer&, // previous layer
+                 struct_layer*);      //  current layer
 
-// if is risen adjust_lay_weights() is called else o_adjust_lay_weights()
+    // adjust weights for current layer in chunk learning
+    void adjust_chunk_lay_weights(const struct_layer&, // previous layer
+                   struct_layer*);      //  current layer
+
+
+    // optimised adjust_lay_weights (), without error backprop extentions
+    void o_adjust_lay_weights(const struct_layer&, // previous layer
+                   struct_layer*);      //  current layer
+
+    // optimised adjust weights for current layer in chunk learning
+    void o_adjust_chunk_lay_weights(const struct_layer&, // previous layer
+                     struct_layer*);      //  current layer
+
+
+    // compute partial derivative of error function for the current layer
+    void compute_lay_pderivs(const struct_layer&, // previous layer
+                  const struct_layer&, // next layer
+                  const matrix< mozgflt,mozgint>&, // weights of
+                                       // previous layer
+                  struct_layer*);      //  current layer
+
+    // compute partial derivative of error function
+    void compute_partial_derivatives();
+
+    // adjust netowrk's weights by backprop
+    void adjust_weights_by_backprop();
+
+    // adjust netowrk's weights by backprop
+    void adjust_weights_by_quickprop(mozgint step_number);
+
+    // adjust netowrk's weights by backprop
+    void adjust_weights_by_rprop(mozgint step_number);
+
+    // if is risen adjust_lay_weights() is called else o_adjust_lay_weights()
     bool flag_of_extensions;
 
-// are risen if first or last example in chunk is run
+    // are risen if first or last example in chunk is run
     bool flag_of_first_chunk_example;
     bool flag_of_last_chunk_example;
 
-// flags is risen if relevant function has been called yet
+    // flags is risen if relevant function has been called yet
     bool is_call_answerMessage;     // answerMessage()
     bool is_call_putNonStdFunction; // putNonStdFunction()
 
-// inline for the sake of confidense:
-    inline mozgflt signum (mozgflt number)
-    {
-      if (number>0.) return 1.;
-      else return (number) ? -1. : 0.;
+    // inline for the sake of confidense:
+    inline mozgflt signum(mozgflt number) {
+        if (number > 0.)
+            return 1.;
+        else
+            return (number) ? -1. : 0.;
     }
+};
 
-  };
-  
 }
 
 

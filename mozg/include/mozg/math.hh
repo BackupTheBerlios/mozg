@@ -1,4 +1,4 @@
-// $Id: math.hh,v 1.1 2006/03/18 21:53:18 lightdruid Exp $
+// $Id: math.hh,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
 // math.hh
 // mozg neuron output functions, them derivatives
 // and some mathematic constants and numbers
@@ -35,40 +35,40 @@
 namespace mozg {
 
 // Coefficient for scaling of second order term in Quickprop
-  extern       mozgflt CUT_QUICKPROP;
+extern       mozgflt CUT_QUICKPROP;
 
 // EPS and OVER_UNIT removes possibility of floating point exception
 // (division by zero in Cross-Entropy, log-squared error)
 // if EPS influences on computational resuts decrease it.
-  extern       mozgflt EPS;
-  extern const mozgflt UNIT;
-  extern       mozgflt OVER_UNIT;
-  extern const mozgflt TWO;
-  extern const mozgflt HALF_UNIT;
-  extern const mozgflt MOZG_2_PI;
+extern       mozgflt EPS;
+extern const mozgflt UNIT;
+extern       mozgflt OVER_UNIT;
+extern const mozgflt TWO;
+extern const mozgflt HALF_UNIT;
+extern const mozgflt MOZG_2_PI;
 
 // neuron output function:
-  extern mozgflt mozg_exp (mozgflt , mozgflt );
-  extern mozgflt mozg_th  (mozgflt , mozgflt );
-  extern mozgflt mozg_lin (mozgflt , mozgflt );
-  extern mozgflt mozg_rbf (mozgflt , mozgflt );
-  extern mozgflt mozg_atg (mozgflt , mozgflt );
+extern mozgflt mozg_exp(mozgflt, mozgflt);
+extern mozgflt mozg_th(mozgflt, mozgflt);
+extern mozgflt mozg_lin(mozgflt, mozgflt);
+extern mozgflt mozg_rbf(mozgflt, mozgflt);
+extern mozgflt mozg_atg(mozgflt, mozgflt);
 
 // user defined neuron output function:
-  extern mozgflt mozg_weinet (mozgflt , mozgflt );
-  extern mozgflt mozg_rbfnet (mozgflt , mozgflt );
+extern mozgflt mozg_weinet(mozgflt, mozgflt);
+extern mozgflt mozg_rbfnet(mozgflt, mozgflt);
 
 // derivative for neuron output function:
-  extern mozgflt mozg_D_exp (mozgflt , mozgflt, mozgflt );
-  extern mozgflt mozg_D_th  (mozgflt , mozgflt, mozgflt );
-  extern mozgflt mozg_D_lin (mozgflt , mozgflt, mozgflt );
-  extern mozgflt mozg_D_rbf (mozgflt , mozgflt, mozgflt );
-  extern mozgflt mozg_D_atg (mozgflt , mozgflt, mozgflt );
+extern mozgflt mozg_D_exp(mozgflt, mozgflt, mozgflt);
+extern mozgflt mozg_D_th(mozgflt, mozgflt, mozgflt);
+extern mozgflt mozg_D_lin(mozgflt, mozgflt, mozgflt);
+extern mozgflt mozg_D_rbf(mozgflt, mozgflt, mozgflt);
+extern mozgflt mozg_D_atg(mozgflt, mozgflt, mozgflt);
 
 // derivative for user defined output function:
-  extern mozgflt mozg_D_weinet (mozgflt , mozgflt, mozgflt );
-  extern mozgflt mozg_D_rbfnet (mozgflt , mozgflt, mozgflt );
-  
+extern mozgflt mozg_D_weinet(mozgflt, mozgflt, mozgflt);
+extern mozgflt mozg_D_rbfnet(mozgflt, mozgflt, mozgflt);
+
 }
 
 

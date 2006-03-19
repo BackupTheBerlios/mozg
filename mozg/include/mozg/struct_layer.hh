@@ -1,4 +1,4 @@
-// $Id: struct_layer.hh,v 1.1 2006/03/18 21:53:18 lightdruid Exp $
+// $Id: struct_layer.hh,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
 // struct_layer.hh
 // mozgMLP layer struct
 //
@@ -36,49 +36,47 @@
 namespace mozg {
 
 // network layer
-  struct struct_layer
-  {
-    vector<mozgflt,mozgint>*         outputs;// neuron outputs
-    vector<mozgflt,mozgint>*         nets;   // weighted inputs sum for non-RBF
-    vector<mozgflt,mozgint>*         errors; // layer errors
-    checked_vector<mozgflt,mozgint>* sigmas; // sigmas - Radial Basis Function
-    vector<mozgflt,mozgint>*         sigmas_in_chunk;// sigmas in chunk
-    
-    checked_matrix<mozgflt,mozgint>* weights;// neuron weights
-    matrix<mozgflt,mozgint>*         RBFinputs;// need for the backpropagate
-                                             // in the case of the RBF output
-                                             // function
-    checked_matrix<mozgflt,mozgint>* weight_etas;// learning rates for Qprop
-    checked_matrix<mozgflt,mozgint>* last_deltas;// neuron weights last deltas
-    matrix<mozgflt,mozgint>*         deltas_in_chunk;// neuron weights last
-                                             //  deltas for chunk
-    matrix<mozgflt,mozgint>*         pderivs;// partial derivative of cost
-                                             // function
-    matrix<mozgflt,mozgint>*         prev_pderivs;// last partial derivative of
-                                             // cost function
-    matrix<mozgflt,mozgint>*         pderivs_in_chunk;// partial derivative of
-                                             // cost function for chunk
-    vector<mozgflt,mozgint>*         sigma_pderivs;// partial derivative of
-                                             // cost function
-    vector<mozgflt,mozgint>*         sigma_prev_pderivs;// last partial
-                                             // derivative of cost function
-    vector<mozgflt,mozgint>*         sigma_pderivs_in_chunk;// partial
-                                             // derivative for chunk
-    checked_vector<mozgflt,mozgint>* last_sigma_deltas;// sigmas last deltas
-    checked_vector<mozgflt,mozgint>* sigma_etas;// learning rates for Qprop
-    
+struct struct_layer {
+    vector< mozgflt,mozgint>* outputs;// neuron outputs
+    vector< mozgflt,mozgint>* nets;   // weighted inputs sum for non-RBF
+    vector< mozgflt,mozgint>* errors; // layer errors
+    checked_vector< mozgflt,mozgint>* sigmas; // sigmas - Radial Basis Function
+    vector< mozgflt,mozgint>* sigmas_in_chunk;// sigmas in chunk
+
+    checked_matrix< mozgflt,mozgint>* weights;// neuron weights
+    matrix< mozgflt,mozgint>* RBFinputs;// need for the backpropagate
+    // in the case of the RBF output
+    // function
+    checked_matrix< mozgflt,mozgint>* weight_etas;// learning rates for Qprop
+    checked_matrix< mozgflt,mozgint>* last_deltas;// neuron weights last deltas
+    matrix< mozgflt,mozgint>* deltas_in_chunk;// neuron weights last
+    //  deltas for chunk
+    matrix< mozgflt,mozgint>* pderivs;// partial derivative of cost
+    // function
+    matrix< mozgflt,mozgint>* prev_pderivs;// last partial derivative of
+    // cost function
+    matrix< mozgflt,mozgint>* pderivs_in_chunk;// partial derivative of
+    // cost function for chunk
+    vector< mozgflt,mozgint>* sigma_pderivs;// partial derivative of
+    // cost function
+    vector< mozgflt,mozgint>* sigma_prev_pderivs;// last partial
+    // derivative of cost function
+    vector< mozgflt,mozgint>* sigma_pderivs_in_chunk;// partial
+    // derivative for chunk
+    checked_vector< mozgflt,mozgint>* last_sigma_deltas;// sigmas last deltas
+    checked_vector< mozgflt,mozgint>* sigma_etas;// learning rates for Qprop
+
     mozgint outputs_num;      // number of units in layer
     mozgint func_number;      // number of output function in layer
-    bool    flag_RBF;         // flag of RBF layer
-    
+    bool flag_RBF;         // flag of RBF layer
+
     OUT_FUNC lay_output_func; // output functions in layer
 
     OUT_FUNC_DERIV lay_output_func_deriv; // its derivative
-    
+
     mozgflt eta;  // learning rate in layer
     mozgflt gain; // inverse temperature in layer's output function
-    
-  };
+};
 
 }
 

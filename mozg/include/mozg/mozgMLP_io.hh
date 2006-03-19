@@ -1,4 +1,4 @@
-// $Id: mozgMLP_io.hh,v 1.1 2006/03/18 21:53:18 lightdruid Exp $
+// $Id: mozgMLP_io.hh,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
 // mozgMLP_io.hh
 // Multi-Layer Perceptron (mozgMLP) simulator i/o function
 //
@@ -44,14 +44,11 @@
 
 namespace mozg {
 
-  std::ofstream& operator << (std::ofstream& output,
-			 const mozgMLP& net);
+std::ofstream& operator <<(std::ofstream& output, const mozgMLP& net);
 
-  std::ifstream& operator >> (std::ifstream& input,
-			 mozgMLP** p_p_net);
+std::ifstream& operator >>(std::ifstream& input, mozgMLP** p_p_net);
 
-  std::ostream& operator << (std::ostream& output,
-			const mozgMLP& net);
+std::ostream& operator <<(std::ostream& output, const mozgMLP& net);
 
 }
 

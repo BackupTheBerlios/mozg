@@ -1,4 +1,4 @@
-// $Id: types.hh,v 1.1 2006/03/18 21:53:18 lightdruid Exp $
+// $Id: types.hh,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
 // types.hh
 // mozg types
 //
@@ -31,12 +31,12 @@
 namespace mozg {
 
 // Basic types:
-  typedef float mozgflt;
-  typedef int   mozgint;
+typedef float mozgflt;
+typedef int mozgint;
 
 // neuron output function and its derivative types
-  typedef mozgflt (*OUT_FUNC)       (mozgflt, mozgflt);
-  typedef mozgflt (*OUT_FUNC_DERIV) (mozgflt, mozgflt, mozgflt);
+typedef mozgflt (*OUT_FUNC)       (mozgflt, mozgflt);
+typedef mozgflt (*OUT_FUNC_DERIV) (mozgflt, mozgflt, mozgflt);
 
 }
 

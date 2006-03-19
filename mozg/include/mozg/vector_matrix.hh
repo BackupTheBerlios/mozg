@@ -1,4 +1,4 @@
-// $Id: vector_matrix.hh,v 1.1 2006/03/18 21:53:18 lightdruid Exp $
+// $Id: vector_matrix.hh,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
 // vector_matrix.hh
 // Kernel library, mix operatiions with objects of vector and matrix
 // classes
@@ -39,43 +39,36 @@
 namespace mozg {
 
 // It computes out vector product of v1 and v2
-  template <class vec_t, class vec_size_t, class matr_t, class matr_size_t>
-    void multiply (const vector<vec_t, vec_size_t>& v1,
-		   const vector<vec_t, vec_size_t>& v2,
-		   matrix<matr_t, matr_size_t>* matr);
+template< class vec_t,class vec_size_t,class matr_t,class matr_size_t> void multiply(const vector< vec_t,vec_size_t>& v1,
+    const vector< vec_t,vec_size_t>& v2, matrix< matr_t,matr_size_t>* matr);
 
 // It computes product of matrix and vector
-  template <class vec_t, class vec_size_t, class matr_t, class matr_size_t>
-    void multiply (const matrix<matr_t,matr_size_t>& matrix,
-		   const vector<vec_t,vec_size_t>&  vector,
-		   vector<vec_t,vec_size_t>*  product_vector);
+template< class vec_t,class vec_size_t,class matr_t,class matr_size_t> void multiply(const matrix< matr_t,matr_size_t>& matrix,
+    const vector< vec_t,vec_size_t>& vector,
+    vector< vec_t,vec_size_t>* product_vector);
 
 // It multiply each element of matrix row and vector and put it in relevent
 // element of product_matrix row
-  template <class vec_t, class vec_size_t, class matr_t, class matr_size_t>
-    void multiply (const matrix<matr_t,matr_size_t>& matrix,
-		   const vector<vec_t,vec_size_t>& vector,
-		   matrix<matr_t,matr_size_t>*  product_matrix);
+template< class vec_t,class vec_size_t,class matr_t,class matr_size_t> void multiply(const matrix< matr_t,matr_size_t>& matrix,
+    const vector< vec_t,vec_size_t>& vector,
+    matrix< matr_t,matr_size_t>* product_matrix);
 
 // It multiply each element of matrix column by one vector element and put it
 // in relevant element of product_matrix column
-  template <class vec_t, class vec_size_t, class matr_t, class matr_size_t>
-    void multiply (const vector<vec_t,vec_size_t>& vector,
-		   const matrix<matr_t,matr_size_t>& matrix,
-		   matrix<matr_t,matr_size_t>*  product_matrix);
+template< class vec_t,class vec_size_t,class matr_t,class matr_size_t> void multiply(const vector< vec_t,vec_size_t>& vector,
+    const matrix< matr_t,matr_size_t>& matrix,
+    matrix< matr_t,matr_size_t>* product_matrix);
 
 // It computes product of matrix and vector for the RBF out function
-  template <class vec_t, class vec_size_t, class matr_t, class matr_size_t>
-    void multiply (const matrix<matr_t,matr_size_t>& matrix,
-		   const vector<vec_t,vec_size_t>&  vector,
-		   matrix<matr_t,matr_size_t>* RBFmatrix,
-		   vector<vec_t,vec_size_t>* product_vector);
-  
+template< class vec_t,class vec_size_t,class matr_t,class matr_size_t> void multiply(const matrix< matr_t,matr_size_t>& matrix,
+    const vector< vec_t,vec_size_t>& vector,
+    matrix< matr_t,matr_size_t>* RBFmatrix,
+    vector< vec_t,vec_size_t>* product_vector);
+
 // It computes product of vector and matrix
-  template <class vec_t, class vec_size_t, class matr_t, class matr_size_t>
-    void multiply (const vector<vec_t,vec_size_t>&  vector,
-		   const matrix<matr_t,matr_size_t>& matrix,
-		   vector<vec_t,vec_size_t>* product_vector);
+template< class vec_t,class vec_size_t,class matr_t,class matr_size_t> void multiply(const vector< vec_t,vec_size_t>& vector,
+    const matrix< matr_t,matr_size_t>& matrix,
+    vector< vec_t,vec_size_t>* product_vector);
 
 }
 
