@@ -1,9 +1,10 @@
-// $Id: math.cc,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
+// $Id: math.cc,v 1.3 2006/03/23 13:14:20 lightdruid Exp $
 // 
 // math.cc
 // mozg neuron output functions, some constants and numbers
 //
 
+#include  <cmath>
 #include  "mozg/math.hh"
 
 

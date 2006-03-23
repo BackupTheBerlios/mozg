@@ -1,0 +1,6 @@
+
+# $Id: Makefile.win,v 1.1 2006/03/23 13:14:18 lightdruid Exp $
+
+all:
+    cd lib
+    nmake /f Makefile.win

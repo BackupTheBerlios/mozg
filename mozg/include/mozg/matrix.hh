@@ -1,4 +1,4 @@
-// $Id: matrix.hh,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
+// $Id: matrix.hh,v 1.3 2006/03/23 13:14:19 lightdruid Exp $
 // matrix.hh
 // Kernel library, matrix and checked_matrix class templates
 //
@@ -184,15 +184,18 @@ template< class matr_t,class matr_size_t> void copy(matr_t* orig,
 // It computes sum of two matrices
 // WARNING !!! make sure the size(=rows_num*columns_num) don't go over
 // the type size !!!
-template< class matr_t,class matr_size_t> void sum(const matrix < matr_t,matr_size_t>& matrix1,
-    const matrix < matr_t,matr_size_t>& matrix2,
-    matrix < matr_t,matr_size_t>* sum_matr);
+template<class matr_t, class matr_size_t> 
+    void sum(const matrix <matr_t,matr_size_t>& matrix1,
+        const matrix <matr_t,matr_size_t>& matrix2,
+        matrix <matr_t,matr_size_t>* sum_matr);
 
 // It adds extra_matrix to matrix
 // WARNING !!! make sure the size(=rows_num*columns_num) don't go over
 // the type size !!!
-template< class matr_t,class matr_size_t> void sum(matrix < matr_t,matr_size_t>* matrix,
-    const matrix < matr_t,matr_size_t>& extra_matrix);
+
+template <class matr_t, class matr_size_t> 
+    void sum(matrix <matr_t, matr_size_t>* m,
+        const matrix <matr_t, matr_size_t>& extra_matrix);
 
 // It multiplies matrix on d
 // WARNING !!! make sure the size(=rows_num*columns_num) don't go over

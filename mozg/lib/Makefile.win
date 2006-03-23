@@ -1,0 +1,14 @@
+
+# $Id: Makefile.win,v 1.1 2006/03/23 13:14:19 lightdruid Exp $
+
+CXX=cl
+CXXFLAGS=/nologo /c /EHsc /D_USE_MATH_DEFINES
+INCLUDES=/I. /I../include
+
+all: $(DEST)/mozg.dll
+
+$(DEST)/mozg.dll:
+    $(CXX) $(CXXFLAGS) $(INCLUDES) mozgMLP_1.cc mozgMLP_2.cc mozgMLP_3.cc
+    $(CXX) $(CXXFLAGS) $(INCLUDES) vector.cc random.cc vector_matrix.cc
+    $(CXX) $(CXXFLAGS) $(INCLUDES) matrix.cc limits.cc math.cc
+

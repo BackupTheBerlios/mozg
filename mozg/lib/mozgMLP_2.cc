@@ -1,4 +1,4 @@
-// $Id: mozgMLP_2.cc,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
+// $Id: mozgMLP_2.cc,v 1.3 2006/03/23 13:14:20 lightdruid Exp $
 // 
 // mozgMLP_2.cc
 // MultiLayer Perceptron (mozgMLP) simulator protected methods
@@ -947,10 +947,10 @@ adjust_weights_by_quickprop(mozgint step_num) {
             else
                 while (k--) {
                     if ((tmp = *sigma_prev_pderiv - *sigma_pderiv) &&
-                        fabs(*sigma <
-                            max_abs_sigma) &&
-                        fabs(*sigma >
-                            min_abs_sigma)) {
+                        // AS: added static_cast<mozgflt>()
+                        fabs(static_cast<mozgflt>(*sigma < max_abs_sigma)) &&
+                        fabs(static_cast<mozgflt>(*sigma > min_abs_sigma))) {
+
                         second_order_term = *sigma_pderiv /
                             tmp * *last_sigma_delta;
 
