@@ -1,14 +1,31 @@
 
-# $Id: Makefile.win,v 1.1 2006/03/23 13:14:19 lightdruid Exp $
+# $Id: Makefile.win,v 1.2 2006/03/23 15:17:53 lightdruid Exp $
 
 CXX=cl
-CXXFLAGS=/nologo /c /EHsc /D_USE_MATH_DEFINES
+LINK=link
+#CXXFLAGS=/nologo /c /EHsc /D_USE_MATH_DEFINES /Gz /MDd
+CXXFLAGS=/nologo /c /EHsc /D_USE_MATH_DEFINES /Gz /Zi
+LDFLAGS=
 INCLUDES=/I. /I../include
 
-all: $(DEST)/mozg.dll
+DEST=.
 
-$(DEST)/mozg.dll:
-    $(CXX) $(CXXFLAGS) $(INCLUDES) mozgMLP_1.cc mozgMLP_2.cc mozgMLP_3.cc
-    $(CXX) $(CXXFLAGS) $(INCLUDES) vector.cc random.cc vector_matrix.cc
-    $(CXX) $(CXXFLAGS) $(INCLUDES) matrix.cc limits.cc math.cc
+SRCS = mozgMLP_1.cc mozgMLP_2.cc mozgMLP_3.cc \
+    vector.cc random.cc vector_matrix.cc \
+    matrix.cc limits.cc math.cc errormessage.cc
 
+OBJS = $(SRCS:.cc=.obj) 
+
+all: $(DEST)/mozg.dll 
+
+$(DEST)/mozg.dll: $(SRCS)
+    @$(CXX) $(CXXFLAGS) $(INCLUDES) $(SRCS)
+    @$(LINK) $(LDFLAGS) -lib $(OBJS) -out:$(DEST)/mozg.lib
+    @$(LINK) $(LDFLAGS) -dll $(OBJS) -out:$(DEST)/mozg.dll
+
+tests: $(DEST)/mozg.dll
+    @echo "Ok"
+    @$(CXX) $(CXXFLAGS) $(INCLUDES) /Fdt.pdb /FRt.sbr t.cc
+    @$(LINK) $(LDFLAGS) t.obj $(DEST)/mozg.lib -out:t.exe
+
+# ---

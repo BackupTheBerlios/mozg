@@ -1,4 +1,4 @@
-// $Id: mozgMLP.hh,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
+// $Id: mozgMLP.hh,v 1.3 2006/03/23 15:17:52 lightdruid Exp $
 // mozgMLP.hh
 // Multi-Layer Perceptron (mozgMLP) simulator class
 //
@@ -53,7 +53,7 @@ public:
     // The function MUST RETURN true if network learning must be ended (error is
     // small enough) then return from learnNet() happens and false in the other
     // case.
-    bool answerMessage(mozgflt, // learning error
+    bool (*answerMessage_)(mozgflt, // learning error
             mozgflt); // test error
 
     struct_layer* layer;          // pointer to the massive of network layers
@@ -102,7 +102,8 @@ public:
          mozgint*, //  number of units in layers (massive)
          mozgint*, //  output function numbers at layers (massive)
          mozgflt, //  sweep of weight randomization
-         bool);          //  flag of bias term
+         bool,          //  flag of bias term
+        bool (*answerMessage)(mozgflt, mozgflt));
 
     // delete network
     virtual ~mozgMLP();

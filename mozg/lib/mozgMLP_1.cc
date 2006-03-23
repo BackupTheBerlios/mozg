@@ -1,4 +1,4 @@
-// $Id: mozgMLP_1.cc,v 1.2 2006/03/19 20:46:17 lightdruid Exp $
+// $Id: mozgMLP_1.cc,v 1.3 2006/03/23 15:17:53 lightdruid Exp $
 // 
 // mozgMLP_1.cc
 // MultiLayer Perceptron (mozgMLP) simulator public methods
@@ -12,9 +12,16 @@ namespace mozg {
 // Create network, use "vanilla" Backprop in learning. If RBF isn't used,
 // RBF_sigma_min doesn't influence on computations
 mozgMLP::
-mozgMLP(mozgint   number_of_layers, mozgint* lay_ouputs_num,
-    mozgint* func_num, mozgflt   sweep, bool bias_term_flag) {
-    struct_layer* lay;
+mozgMLP(mozgint number_of_layers, mozgint* lay_ouputs_num,
+    mozgint* func_num, mozgflt sweep, bool bias_term_flag,
+    bool (*answerMessage)(mozgflt, mozgflt)) : 
+        answerMessage_(answerMessage){
+
+
+    if(answerMessage_ == 0) {
+        sendErrorMessage("answerMessage method is not initialised", 1);
+    }
+    struct_layer* lay;    
 
     layers_num = number_of_layers;
     if (layers_num < 2)
@@ -577,7 +584,7 @@ learnNet(mozgflt** linp, mozgflt** lout, mozgint lssize, mozgint order,
             tprint = 0;
 
             // finish (1) or continue (0) learning...
-            if (answerMessage(lerr / lssize, (mozgflt) 0))
+            if ((*answerMessage_)(lerr / lssize, (mozgflt) 0))
                 i = epnum + 1;
         }
     }
@@ -718,7 +725,7 @@ learnNet(mozgflt** linp, mozgflt** lout, mozgint lssize, mozgint order,
                 tsqer += error_over_outputs;
             }
             // finish (1) or continue (0) learning...
-            if (answerMessage(lerr / lssize, tsqer / tssize))
+            if ((*answerMessage_)(lerr / lssize, tsqer / tssize))
                 i = epnum + 1;
         }
     }
