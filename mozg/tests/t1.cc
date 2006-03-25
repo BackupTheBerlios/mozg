@@ -1,5 +1,5 @@
 
-// $Id: t1.cc,v 1.1 2006/03/23 15:17:53 lightdruid Exp $
+// $Id: t1.cc,v 1.2 2006/03/25 11:18:04 lightdruid Exp $
 
 
 #include <mozg/mozgMLP.hh>
@@ -20,6 +20,7 @@ int main() {
     mozgint nfunc[] = { 0, 4, 2 };
 
     mozgMLP* mlp = new mozgMLP(nlayers, &nunits, nfunc, sweep, flag, &test);
+    delete mlp;
 
     return 0;
 }

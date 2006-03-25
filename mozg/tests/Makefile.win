@@ -1,0 +1,24 @@
+
+# $Id: Makefile.win,v 1.1 2006/03/25 11:18:04 lightdruid Exp $
+
+CXX=cl
+LINK=link
+#CXXFLAGS=/nologo /c /EHsc /D_USE_MATH_DEFINES /Gz /MDd
+CXXFLAGS=/nologo /c /EHsc /D_USE_MATH_DEFINES /Gz /Zi
+LDFLAGS=
+INCLUDES=/I. /I../include
+
+DEST=.
+
+SRCS = t1.cc
+
+OBJS = $(SRCS:.cc=.obj) 
+EXECS = $(SRCS:.cc=.exe) 
+
+all: $(EXECS)
+
+$(EXECS): $(SRCS)
+    @$(CXX) $(CXXFLAGS) $(INCLUDES) $(SRCS)
+    @$(LINK) $(LDFLAGS) $(OBJS) ../lib/mozg.lib
+
+# ---

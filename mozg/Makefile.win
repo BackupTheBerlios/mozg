@@ -1,6 +1,10 @@
 
-# $Id: Makefile.win,v 1.1 2006/03/23 13:14:18 lightdruid Exp $
+# $Id: Makefile.win,v 1.2 2006/03/25 11:18:04 lightdruid Exp $
 
 all:
     cd lib
+    nmake /f Makefile.win
+
+tests:
+    cd tests
     nmake /f Makefile.win
