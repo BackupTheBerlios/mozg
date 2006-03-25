@@ -162,9 +162,9 @@ NOTE: at the first layer the number of units also must include bias unit, but
 
 
         2. void putBackprop(float learning_rate     = .2, here and later it
-	                    mozgint rate_mode       = 0,  means default value
+                        mozgint rate_mode       = 0,  means default value
                             float temperature       = 1.,
-		            int energy_function     = 1,
+                    int energy_function     = 1,
                             int num_for_chunk       = 1,
                             int steps_number        = 1);
 
@@ -210,11 +210,11 @@ NOTE: at the first layer the number of units also must include bias unit, but
 
 
         3. putQuickprop(float learning_rate     = .2,
-	                int rate_mode           = 0, 
-	                float temperature       = 1.,
-	                int energy_function     = 1,
+                    int rate_mode           = 0, 
+                    float temperature       = 1.,
+                    int energy_function     = 1,
                         int num_for_chunk       = 1,
-	                int steps_number        = 10)
+                    int steps_number        = 10)
 
           float learning_rate is used as learning rate for first step for each
     learning example by backprop and as learning rate for first order term in
@@ -226,11 +226,11 @@ NOTE: at the first layer the number of units also must include bias unit, but
 
 
         4. putRprop(float gamma_plus        = 1.02,
-	            float gamma_minus       = .5,
-	            float learning_rate     = .2,
-	            int rate_mode           = 0,
-	            float temperature       = 1.,
-	            int energy_function     = 1)
+                float gamma_minus       = .5,
+                float learning_rate     = .2,
+                int rate_mode           = 0,
+                float temperature       = 1.,
+                int energy_function     = 1)
 
           float gamma_plus and
           float gamma_minus -- constants in the learning rule, must be
@@ -246,9 +246,9 @@ NOTE: at the first layer the number of units also must include bias unit, but
 
 
         5. void putExtensions(float mom_term_coef     = 0.,
-		              float lang_noise_begin_dispersion = 0.,
-		              float lang_noise_disp_decr_coef   = 0.,
-		              float weight_decay_coef = 0.);
+                      float lang_noise_begin_dispersion = 0.,
+                      float lang_noise_disp_decr_coef   = 0.,
+                      float weight_decay_coef = 0.);
 
           float mom_term_coef -- momentum term coefficient(alpha) in
     weight changing rule:
@@ -258,14 +258,14 @@ NOTE: at the first layer the number of units also must include bias unit, but
 
     is recomended to be in interval 0...1.
 
-	  float lang_noise_begin_dispersion begin value of the dispersion of
+      float lang_noise_begin_dispersion begin value of the dispersion of
     the Langevin noise(Gauss noise) term in a weight changing rule:
 
              w_{ij,t+1} = w_{ij,t} + ... + noise_term.
 
     It must be sufficiently small for successful learning.
 
-	  float lang_noise_disp_decr_coef -- decreasing coefficient of the
+      float lang_noise_disp_decr_coef -- decreasing coefficient of the
     Langevin dispersion in learning phase:
 
              Langevin_sigma_{t+1} =
@@ -274,7 +274,7 @@ NOTE: at the first layer the number of units also must include bias unit, but
     where t+1 -- next call of the AdjustWeights(). It must be putted
     approximatly 0.99, surely, in [0,1).
 
-	  float weight_decay_coef -- weight decay coefficient for decay term in
+      float weight_decay_coef -- weight decay coefficient for decay term in
     a weight changing rule:
 
              w_{ij,t+1} = w_{ij,t} + ... -
@@ -312,7 +312,7 @@ NOTE: you may don't call the function 2., 3., 4., 5. then default values is
           b) void learnNet (float** linputs,
                             float** loutputs,
                             int lssize,
-		            int vec_order
+                    int vec_order
                             int epnum,
                             int pepnum)
 
@@ -327,7 +327,7 @@ NOTE: you may don't call the function 2., 3., 4., 5. then default values is
     by the array, one error backpropagation for each learning  example in epoch
     is used,
 
-	     2) vec_order = 0 -- in random order of learning examples (regular
+         2) vec_order = 0 -- in random order of learning examples (regular
     distribution is used), that helps to improve network generalisation; in the
     case some examples will be used larger and some less number of times, but
     common number of error backpropagation is equal to one in 1);
@@ -352,7 +352,7 @@ NOTE: learning error isn't the mean squared error on learning set, it is the
           c) void learnNet (float** linputs,
                             float** loutputs,
                             int lssize,
-		            int vec_order,
+                    int vec_order,
                             int epnum,
                             int pepnum,
                             float** tinputs,
@@ -447,7 +447,7 @@ NOTE: network is loaded to the dynamic memory wich is allocated in the
 PLEASE DEFINE THE MEMBER-FUNCTION(if you use learnNet() b) or c)):
 
         12. bool answerMessage(float learn_error,
-			       float test_error)
+                   float test_error)
 
           float learn_error and
           float test_error -- values of learning and test errors being sent
@@ -469,7 +469,7 @@ PLEASE DEFINE THE MEMBER-FUNCTION(if you use learnNet() b) or c)):
      A simple example:
 
         bool mozgMLP::answerMessage(float learn_error,
-        			    float test_error)
+                        float test_error)
         {
           cout << "Overall number of epoch since learning beginning: "
         // overall_epnum -- instance-variable of mozgMLP class (float)
@@ -560,7 +560,7 @@ NOTE: you may continue learning of the network by another call of learnNet
         int  number_layers;
         int* num_of_outputs_at_layers;
         int* num_of_output_f;
-	int  num_for_chunk_updating;
+        int  num_for_chunk_updating;
         int  learning_set_size;
         int  vec_order;
         int  rate_mode;
@@ -586,7 +586,7 @@ NOTE: you may continue learning of the network by another call of learnNet
         net.putBackprop (learning_rate,
                          rate_mode,
                          temperature,
-		         energy_function,
+                 energy_function,
                          num_for_chunk_updating,
                          steps_number);
 
@@ -658,36 +658,36 @@ NOTE: you may continue learning of the network by another call of learnNet
       For example, you want to insert y = sin(net), then you must write in
     mozgweinet (net,sigm):
 
-	  mozgflt mozgweinet (mozgflt net,mozgflt sigm)
-	  { return sin(net); }
+      mozgflt mozgweinet (mozgflt net,mozgflt sigm)
+      { return sin(net); }
 
     Then, because of y' = cos(x) = sqrt(1-y^2), you must write in the
     mozgDweinet (out,net,sigm):
 
-	  mozgflt mozgDweinet (mozgflt out,mozgflt net,mozgflt sigm)
-	  { return cos(net); }
+      mozgflt mozgDweinet (mozgflt out,mozgflt net,mozgflt sigm)
+      { return cos(net); }
 
     or (for some functions using of "out" instead of "net" is more convenient)
 
-	  mozgflt mozgDweinet (mozgflt out,mozgflt net,mozgflt sigm)
-	  { return sqrt(1 - out * out); }
+      mozgflt mozgDweinet (mozgflt out,mozgflt net,mozgflt sigm)
+      { return sqrt(1 - out * out); }
 
         2. If you want to use RBFnet = -.5*sum(m_{ij}-y_j)^2/sigma_i^2, for
     example y = sin(RBFnet), you must write in mozgrbfnet (RBFnet,sigm):
 
-	  mozgflt mozgrbfnet (mozgflt RBFnet,mozgflt sigm)
-	  { return sin(-.5 * RBFnet / (sigm * sigm)); }
+      mozgflt mozgrbfnet (mozgflt RBFnet,mozgflt sigm)
+      { return sin(-.5 * RBFnet / (sigm * sigm)); }
 
     and, because of y' = cos(RBFnet) = sqrt(1-y^2), you must write in the
     mozgDrbfnet (out,RBFnet,sigm):
 
-	  mozgflt mozgDrbfnet (mozgflt out,mozgflt RBFnet,mozgflt sigm)
-	  { return cos(-.5 * RBFnet / (sigm * sigm)); }
+      mozgflt mozgDrbfnet (mozgflt out,mozgflt RBFnet,mozgflt sigm)
+      { return cos(-.5 * RBFnet / (sigm * sigm)); }
 
     or(for some functions using of out instead of RBFnet is more convenient)
 
-	  mozgflt mozgDrbfnet (mozgflt out,mozgflt RBFnet,mozgflt sigm)
-	  { return sqrt(1 - out * out) / (sigm * sigm); }
+      mozgflt mozgDrbfnet (mozgflt out,mozgflt RBFnet,mozgflt sigm)
+      { return sqrt(1 - out * out) / (sigm * sigm); }
 
 NOTE: If you use non-standard output function on output layer and cross-entropy
     error function then after mozgMLP() and before learnNet() calls you

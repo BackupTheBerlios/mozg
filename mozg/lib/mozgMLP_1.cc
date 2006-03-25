@@ -1,4 +1,4 @@
-// $Id: mozgMLP_1.cc,v 1.4 2006/03/25 20:12:53 lightdruid Exp $
+// $Id: mozgMLP_1.cc,v 1.5 2006/03/25 20:47:40 lightdruid Exp $
 // 
 // mozgMLP_1.cc
 // MultiLayer Perceptron (mozgMLP) simulator public methods
@@ -456,6 +456,7 @@ learnNet(mozgflt* linp, mozgflt* lout) {
 void mozgMLP::
 learnNet(mozgflt** linp, mozgflt** lout, mozgint lssize, mozgint order,
     mozgint epnum, mozgint pepnum) {
+
     mozgint vecnum;
     mozgint random_vecnum = 0;
     mozgint vec_num = 0;

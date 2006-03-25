@@ -1,5 +1,5 @@
 
-# $Id: Makefile.win,v 1.1 2006/03/25 11:18:04 lightdruid Exp $
+# $Id: Makefile.win,v 1.2 2006/03/25 20:47:41 lightdruid Exp $
 
 CXX=cl
 LINK=link
@@ -13,11 +13,11 @@ DEST=.
 SRCS = t1.cc
 
 OBJS = $(SRCS:.cc=.obj) 
-EXECS = $(SRCS:.cc=.exe) 
+EXEC1 = t1.exe
 
-all: $(EXECS)
+all: $(EXEC1)
 
-$(EXECS): $(SRCS)
+$(EXEC1): $(SRCS)
     @$(CXX) $(CXXFLAGS) $(INCLUDES) $(SRCS)
     @$(LINK) $(LDFLAGS) $(OBJS) ../lib/mozg.lib
 
