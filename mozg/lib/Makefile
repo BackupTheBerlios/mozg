@@ -36,8 +36,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = @build@
-host_triplet = @host@
+build_triplet = i686-pc-linux-gnu
+host_triplet = i686-pc-linux-gnu
 subdir = lib
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -80,31 +80,31 @@ ACLOCAL = ${SHELL} /home/as/projects/mozg/missing --run aclocal-1.9
 AMDEP_FALSE = #
 AMDEP_TRUE = 
 AMTAR = ${SHELL} /home/as/projects/mozg/missing --run tar
-AR = @AR@
+AR = ar
 AUTOCONF = ${SHELL} /home/as/projects/mozg/missing --run autoconf
 AUTOHEADER = ${SHELL} /home/as/projects/mozg/missing --run autoheader
 AUTOMAKE = ${SHELL} /home/as/projects/mozg/missing --run automake-1.9
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2
-CPP = @CPP@
+CFLAGS = -g
+CPP = gcc -E
 CPPFLAGS = 
-CXX = @CXX@
-CXXCPP = @CXXCPP@
-CXXDEPMODE = @CXXDEPMODE@
-CXXFLAGS = @CXXFLAGS@
+CXX = g++
+CXXCPP = g++ -E
+CXXDEPMODE = depmode=gcc3
+CXXFLAGS = -g -O2
 CYGPATH_W = echo
-DEFS = -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"hello\" -DVERSION=\"0.1\" 
+DEFS = -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"hello\" -DVERSION=\"0.1\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1 
 DEPDIR = .deps
-ECHO = @ECHO@
+ECHO = echo
 ECHO_C = 
 ECHO_N = -n
 ECHO_T = 
-EGREP = @EGREP@
+EGREP = grep -E
 EXEEXT = 
-F77 = @F77@
-FFLAGS = @FFLAGS@
+F77 = g77
+FFLAGS = -g -O2
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
@@ -112,8 +112,8 @@ INSTALL_STRIP_PROGRAM = ${SHELL} $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
 LIBS = 
-LIBTOOL = @LIBTOOL@
-LN_S = @LN_S@
+LIBTOOL = $(SHELL) $(top_builddir)/libtool
+LN_S = ln -s
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/as/projects/mozg/missing --run makeinfo
 OBJEXT = o
@@ -124,39 +124,39 @@ PACKAGE_STRING =
 PACKAGE_TARNAME = 
 PACKAGE_VERSION = 
 PATH_SEPARATOR = :
-RANLIB = @RANLIB@
+RANLIB = ranlib
 SET_MAKE = 
 SHELL = /bin/sh
-STRIP = 
+STRIP = strip
 VERSION = 0.1
-ac_ct_AR = @ac_ct_AR@
+ac_ct_AR = ar
 ac_ct_CC = gcc
-ac_ct_CXX = @ac_ct_CXX@
-ac_ct_F77 = @ac_ct_F77@
-ac_ct_RANLIB = @ac_ct_RANLIB@
-ac_ct_STRIP = 
+ac_ct_CXX = g++
+ac_ct_F77 = g77
+ac_ct_RANLIB = ranlib
+ac_ct_STRIP = strip
 am__fastdepCC_FALSE = #
 am__fastdepCC_TRUE = 
-am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
-am__fastdepCXX_TRUE = @am__fastdepCXX_TRUE@
+am__fastdepCXX_FALSE = #
+am__fastdepCXX_TRUE = 
 am__include = include
 am__leading_dot = .
 am__quote = 
 am__tar = ${AMTAR} chof - "$$tardir"
 am__untar = ${AMTAR} xf -
 bindir = ${exec_prefix}/bin
-build = @build@
+build = i686-pc-linux-gnu
 build_alias = 
-build_cpu = @build_cpu@
-build_os = @build_os@
-build_vendor = @build_vendor@
+build_cpu = i686
+build_os = linux-gnu
+build_vendor = pc
 datadir = ${prefix}/share
 exec_prefix = ${prefix}
-host = @host@
+host = i686-pc-linux-gnu
 host_alias = 
-host_cpu = @host_cpu@
-host_os = @host_os@
-host_vendor = @host_vendor@
+host_cpu = i686
+host_os = linux-gnu
+host_vendor = pc
 includedir = ${prefix}/include
 infodir = ${prefix}/info
 install_sh = /home/as/projects/mozg/install-sh
@@ -259,25 +259,25 @@ include ./$(DEPDIR)/vector_matrix.Plo
 include ./$(DEPDIR)/vector_matrix_io.Plo
 
 .cc.o:
-@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no \
-@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(CXXCOMPILE) -c -o $@ $<
 
 .cc.obj:
-@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no \
-@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .cc.lo:
-@am__fastdepCXX_TRUE@	if $(LTCXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes \
-@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+	if $(LTCXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(LTCXXCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
